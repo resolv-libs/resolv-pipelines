@@ -4,7 +4,7 @@ import os
 from pathlib import Path
 from typing import List, Union
 
-from modules.libs.datasets.constants import get_dataset_root_dir_name
+from resolv_data import get_dataset_root_dir_name
 from scripts import utilities, constants
 
 PY_FILE_PATH = str(constants.Paths.BEAM_PIPELINES_DIR / 'canonicalize_dataset_pipeline.py')

@@ -39,9 +39,9 @@ import apache_beam as beam
 import apache_beam.metrics as beam_metrics
 from apache_beam.options.pipeline_options import PipelineOptions
 
-from modules.libs.mir.protobuf.protos.symbolic_music_pb2 import NoteSequence
-from modules.beam.dofn.metrics import METRIC_DO_FN_MAP
-from modules.beam.dofn.utilities import CountElementsDoFn, GenerateHistogram, UploadToS3
+from resolv_mir import NoteSequence
+from beam.dofn.metrics import METRIC_DO_FN_MAP
+from beam.dofn.utilities import CountElementsDoFn, GenerateHistogram, WriteFileToFileSystem
 
 
 def _build_arg_parser() -> argparse.ArgumentParser:
@@ -113,7 +113,7 @@ def run_pipelines(argv=None) -> List[beam.Pipeline]:
             | beam.GroupByKey()
             | beam.Map(lambda kv: (kv[0], list(kv[1])))
             | f'GenerateHistogram' >> beam.ParDo(GenerateHistogram(bins=histogram_bins_list))
-            | f'WriteHistogram' >> beam.ParDo(UploadToS3(f'{source_dataset_path}/histograms', "image/png"))
+            | f'WriteHistogram' >> beam.ParDo(WriteFileToFileSystem(f'{source_dataset_path}/histograms', "image/png"))
         )
 
         # Wait for pipeline to finish

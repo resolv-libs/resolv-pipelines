@@ -21,11 +21,10 @@ from apache_beam.io.filesystems import FileSystems
 from apache_beam.metrics import Metrics as beam_metrics
 from google.protobuf.json_format import MessageToJson, MessageToDict
 
-import modules.canonical.wrapper as adapter
-from modules.canonical.exceptions import CanonicalizationError
-from modules.canonical.base import CanonicalFormat
-from modules.beam.dofn.base import ConfigurableDoFn, DoFnDebugConfig
-from modules.libs.datasets.protobuf.protos.dataset_index_pb2 import DatasetEntry
+from resolv_data import DatasetEntry
+from resolv_data.canonical import CanonicalFormat, to_canonical_format
+from resolv_data.canonical.exceptions import CanonicalizationError
+from beam.dofn.base import ConfigurableDoFn, DoFnDebugConfig
 
 
 @beam.typehints.with_input_types(DatasetEntry)
@@ -119,7 +118,7 @@ class ToCanonicalFormatDoFn(ConfigurableDoFn):
 
         content, source_type, dict_metadata = element
         try:
-            canonical_format = adapter.to_canonical_format(source_type, content, dict_metadata)
+            canonical_format = to_canonical_format(source_type, content, dict_metadata)
             self._write_debug(canonical_format, dict_metadata)
             yield canonical_format
         except CanonicalizationError as e:

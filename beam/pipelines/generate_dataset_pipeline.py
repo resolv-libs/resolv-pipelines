@@ -67,10 +67,10 @@ import apache_beam.metrics as beam_metrics
 from apache_beam.io.filesystems import FileSystems
 from apache_beam.options.pipeline_options import PipelineOptions
 
-from modules.libs.mir.protobuf.protos.symbolic_music_pb2 import NoteSequence
-from modules.beam.dofn.base import DoFnDebugConfig, DebugOutputTypeEnum
-from modules.beam.dofn.note_sequence import NS_DO_FN_MAP, DistinctNoteSequences
-from modules.beam.dofn.utilities import CountElementsDoFn
+from resolv_mir import NoteSequence
+from beam.dofn.base import DoFnDebugConfig, DebugOutputTypeEnum
+from beam.dofn.note_sequence import NS_DO_FN_MAP, DistinctNoteSequences
+from beam.dofn.utilities import CountElementsDoFn
 
 
 def _build_arg_parser() -> argparse.ArgumentParser:

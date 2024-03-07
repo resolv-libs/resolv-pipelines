@@ -58,12 +58,9 @@ import apache_beam as beam
 from apache_beam.io.filesystems import FileSystems
 from google.protobuf.json_format import MessageToJson
 
-from modules.libs.mir.protobuf.protos.symbolic_music_pb2 import NoteSequence
-from modules.libs.mir.note_sequence import constants
-from modules.libs.mir.note_sequence.metrics import dynamics as dynamics_metrics
-from modules.libs.mir.note_sequence.metrics import rhythmic as rhythmic_metrics
-from modules.libs.mir.note_sequence.metrics import pitch as pitch_metrics
-from modules.beam.dofn.base import ConfigurableDoFn, DoFnDebugConfig
+from resolv_mir import NoteSequence
+from resolv_mir.note_sequence import constants, metrics
+from beam.dofn.base import ConfigurableDoFn, DoFnDebugConfig
 
 
 @beam.typehints.with_input_types(NoteSequence)
@@ -182,7 +179,7 @@ class ToussaintMetricDoFn(MetricDoFn):
         return "toussaint"
 
     def _process_internal(self, note_sequence: NoteSequence) -> float:
-        return rhythmic_metrics.toussaint(note_sequence, self._config['bars'], self._config['binary'])
+        return metrics.rhythmic.toussaint(note_sequence, self._config['bars'], self._config['binary'])
 
 
 class NoteDensityMetricDoFn(MetricDoFn):
@@ -207,7 +204,7 @@ class NoteDensityMetricDoFn(MetricDoFn):
         return "note_density"
 
     def _process_internal(self, note_sequence: NoteSequence) -> float:
-        return rhythmic_metrics.note_density(note_sequence, self._config['bars'], self._config['binary'])
+        return metrics.rhythmic.note_density(note_sequence, self._config['bars'], self._config['binary'])
 
 
 class PitchRangeMetricDoFn(MetricDoFn):
@@ -231,7 +228,7 @@ class PitchRangeMetricDoFn(MetricDoFn):
         return "pitch_range"
 
     def _process_internal(self, note_sequence: NoteSequence) -> float:
-        return pitch_metrics.pitch_range(note_sequence, self._config['num_midi_pitches'])
+        return metrics.pitch.pitch_range(note_sequence, self._config['num_midi_pitches'])
 
 
 class ContourMetricDoFn(MetricDoFn):
@@ -255,7 +252,7 @@ class ContourMetricDoFn(MetricDoFn):
         return "contour"
 
     def _process_internal(self, note_sequence: NoteSequence) -> float:
-        return pitch_metrics.contour(note_sequence, self._config['num_midi_pitches'])
+        return metrics.pitch.contour(note_sequence, self._config['num_midi_pitches'])
 
 
 class UniqueNotesMetricDoFn(MetricDoFn):
@@ -279,7 +276,7 @@ class UniqueNotesMetricDoFn(MetricDoFn):
         return "unique_notes_ratio"
 
     def _process_internal(self, note_sequence: NoteSequence) -> float:
-        return pitch_metrics.ratio_unique_notes(note_sequence)
+        return metrics.pitch.ratio_unique_notes(note_sequence)
 
 
 class UniqueBigramsMetricDoFn(MetricDoFn):
@@ -303,7 +300,7 @@ class UniqueBigramsMetricDoFn(MetricDoFn):
         return "unique_bigrams_ratio"
 
     def _process_internal(self, note_sequence: NoteSequence) -> float:
-        return pitch_metrics.ratio_unique_ngrams(note_sequence, 2)
+        return metrics.pitch.ratio_unique_ngrams(note_sequence, 2)
 
 
 class UniqueTrigramsMetricDoFn(MetricDoFn):
@@ -327,7 +324,7 @@ class UniqueTrigramsMetricDoFn(MetricDoFn):
         return "unique_trigrams_ratio"
 
     def _process_internal(self, note_sequence: NoteSequence) -> float:
-        return pitch_metrics.ratio_unique_ngrams(note_sequence, 3)
+        return metrics.pitch.ratio_unique_ngrams(note_sequence, 3)
 
 
 class DynamicRangeMetricDoFn(MetricDoFn):
@@ -349,7 +346,7 @@ class DynamicRangeMetricDoFn(MetricDoFn):
         return "dynamic_range"
 
     def _process_internal(self, note_sequence: NoteSequence) -> float:
-        return dynamics_metrics.dynamic_range(note_sequence)
+        return metrics.dynamics.dynamic_range(note_sequence)
 
 
 class NoteChangeMetricDoFn(MetricDoFn):
@@ -371,7 +368,7 @@ class NoteChangeMetricDoFn(MetricDoFn):
         return "note_change_ratio"
 
     def _process_internal(self, note_sequence: NoteSequence) -> float:
-        return dynamics_metrics.ratio_note_change(note_sequence)
+        return metrics.dynamics.ratio_note_change(note_sequence)
 
 
 class RatioNoteOffMetricDoFn(MetricDoFn):
@@ -393,7 +390,7 @@ class RatioNoteOffMetricDoFn(MetricDoFn):
         return "ratio_note_off_steps"
 
     def _process_internal(self, note_sequence: NoteSequence) -> float:
-        return dynamics_metrics.ratio_note_off_steps(note_sequence)
+        return metrics.dynamics.ratio_note_off_steps(note_sequence)
 
 
 class RatioHoldNoteMetricDoFn(MetricDoFn):
@@ -415,7 +412,7 @@ class RatioHoldNoteMetricDoFn(MetricDoFn):
         return "ratio_hold_note_steps"
 
     def _process_internal(self, note_sequence: NoteSequence) -> float:
-        return dynamics_metrics.ratio_hold_note_steps(note_sequence)
+        return metrics.dynamics.ratio_hold_note_steps(note_sequence)
 
 
 class RepetitiveSectionDoFn(MetricDoFn):
@@ -439,7 +436,7 @@ class RepetitiveSectionDoFn(MetricDoFn):
         return "repetitive_section_ratio"
 
     def _process_internal(self, note_sequence: NoteSequence) -> float:
-        return dynamics_metrics.ratio_repetitive_sections(note_sequence, self._config['min_repetitions'])
+        return metrics.dynamics.ratio_repetitive_sections(note_sequence, self._config['min_repetitions'])
 
 
 class LongestRepetitiveSectionDoFn(MetricDoFn):
@@ -463,7 +460,7 @@ class LongestRepetitiveSectionDoFn(MetricDoFn):
         return "len_longest_rep_section"
 
     def _process_internal(self, note_sequence: NoteSequence) -> float:
-        return dynamics_metrics.length_longest_repetitive_section(note_sequence, self._config['min_repetitions'])
+        return metrics.dynamics.length_longest_repetitive_section(note_sequence, self._config['min_repetitions'])
 
 
 # Dictionary mapping metric names to their respective computation classes

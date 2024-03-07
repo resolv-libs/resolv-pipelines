@@ -36,7 +36,6 @@ Run the script with standard 'PipelineOptions' from BEAM and with the following 
 """
 import argparse
 import logging
-import typing
 from pathlib import Path
 
 import apache_beam as beam
@@ -45,11 +44,11 @@ from apache_beam.io.filesystems import FileSystems
 from apache_beam.options.pipeline_options import PipelineOptions
 from google.protobuf.json_format import Parse
 
-from resolv_data.protobuf import DatasetIndex
-from ...canonical.wrapper import adapter
-from ..dofn.base import DoFnDebugConfig
-from ..dofn.canonical import ReadDatasetEntryFileDoFn, ToCanonicalFormatDoFn
-from ..dofn.utilities import CountElementsDoFn
+from resolv_data import DatasetIndex
+from resolv_data.canonical import get_canonical_format_by_source_type
+from beam.dofn.base import DoFnDebugConfig
+from beam.dofn.canonical import ReadDatasetEntryFileDoFn, ToCanonicalFormatDoFn
+from beam.dofn.utilities import CountElementsDoFn
 
 
 def _build_arg_parser() -> argparse.ArgumentParser:
@@ -102,12 +101,11 @@ def _build_arg_parser() -> argparse.ArgumentParser:
     return parser
 
 
-def _resolve_proto_format_by_file_type(dataset_index: DatasetIndex, file_type: str):
+def _get_canonical_format_by_file_type(dataset_index: DatasetIndex, file_type: str):
     dataset_entry = dataset_index.entries[0]
     dataset_file = dataset_entry.files[file_type]
     source_type = Path(dataset_file.path).suffix
-    data_adapter = adapter.resolve_data_adapter_by_source_type(source_type)
-    return typing.get_args(data_adapter.__orig_bases__[0])
+    return get_canonical_format_by_source_type(source_type)
 
 
 def run_pipelines():
@@ -154,7 +152,7 @@ def run_pipelines():
         with FileSystems.open(dataset_index_file_path) as index_file:
             dataset_index = Parse(index_file.read(), DatasetIndex())
             dataset_entries = dataset_index.entries
-            data_adapter_type = _resolve_proto_format_by_file_type(dataset_index, dataset_file_type)
+            data_adapter_type = _get_canonical_format_by_file_type(dataset_index, dataset_file_type)
             _ = (
                     pipeline
                     | 'CreateDatasetTracksPColl' >> beam.Create(dataset_entries)

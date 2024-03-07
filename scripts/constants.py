@@ -22,9 +22,7 @@ class Paths:
     ROOT_DIR = Path(os.path.dirname(os.path.abspath(__file__))).parent
     SCRIPTS_DIR = ROOT_DIR / 'scripts'
     RESOURCES_DIR = ROOT_DIR / 'resources'
-    MODULES_DIR = ROOT_DIR / 'modules'
-    BEAM_PIPELINES_DIR = MODULES_DIR / 'beam' / 'pipelines'
-    VENV_ACTIVATION_SCRIPT = ROOT_DIR / 'activate_environment.sh'
+    BEAM_PIPELINES_DIR = ROOT_DIR / 'beam' / 'pipelines'
 
     # ------------ DATASETS ------------
     DATASET_SCRIPTS_DIR = SCRIPTS_DIR / 'dataset'

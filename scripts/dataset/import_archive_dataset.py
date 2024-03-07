@@ -1,8 +1,8 @@
 import argparse
 import logging
 
-from modules.libs.datasets.base import DirectoryDataset
-from modules.libs.datasets.constants import DATASET_TYPE_MAP
+from resolv_data import DirectoryDataset
+from resolv_data import DATASET_TYPE_MAP
 from scripts import utilities
 from scripts.constants import Paths
 

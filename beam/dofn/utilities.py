@@ -89,11 +89,11 @@ class GenerateHistogram(beam.DoFn):
             yield image_name, image_bytes
 
 
-class UploadToS3(beam.DoFn):
-    """ A DoFn for uploading data to an S3 storage.
+class WriteFileToFileSystem(beam.DoFn):
+    """ A DoFn for writing a file to a file system.
 
     Attributes:
-        _output_path (str): The S3 output path for uploading data.
+        _output_path (str): The file system's path where o save the file.
         _mime_type (str): The MIME type of the data.
 
     Methods:
@@ -101,18 +101,18 @@ class UploadToS3(beam.DoFn):
     """
 
     def __init__(self, output_path: str, mime_type: str = "application/octet-stream"):
-        """ Initializes an UploadToS3 object.
+        """ Initializes an WriteFileToFileSystem object.
 
         Args:
-            output_path (str): The S3 path where to upload the data.
+            output_path (str): The file system's path where o save the file.
             mime_type (str, optional): The MIME type of the data to upload. Defaults to "application/octet-stream".
         """
-        super(UploadToS3, self).__init__()
+        super(WriteFileToFileSystem, self).__init__()
         self._mime_type = mime_type
         self._output_path = output_path
 
     def process(self, element, *args, **kwargs):
-        """ Process a single element and upload it to S3.
+        """ Process a single element and write the file to the file system.
 
         Args:
             element (Tuple[str, bytes]): A tuple containing the filename and data to be uploaded.

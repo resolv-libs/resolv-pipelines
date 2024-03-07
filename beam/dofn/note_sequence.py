@@ -32,8 +32,8 @@ from google.protobuf.json_format import MessageToJson
 from resolv_mir.protobuf import NoteSequence
 from resolv_mir.note_sequence import exceptions, constants, processors
 
-from ...canonical import wrapper as adapter
-from .base import ConfigurableDoFn, DoFnDebugConfig, DebugOutputTypeEnum
+from resolv_data.canonical import to_source_format
+from beam.dofn.base import ConfigurableDoFn, DoFnDebugConfig, DebugOutputTypeEnum
 
 
 @beam.typehints.with_input_types(NoteSequence)
@@ -138,7 +138,7 @@ class NoteSequenceDoFn(ConfigurableDoFn, ABC):
                     source_type = Path(processed_sequence.filepath).suffix
                     filename = f'{base_filename}{source_type}'
                     key = f"{self._debug_config.output_path}/debug/processors/{self.__class__.__name__}/{filename}"
-                    data = adapter.to_source_format(source_type, processed_sequence)
+                    data = to_source_format(source_type, processed_sequence)
                     mime_type = 'application/octet-stream'
                 with FileSystems.create(key, mime_type) as writer:
                     writer.write(data)
