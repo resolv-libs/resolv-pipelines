@@ -166,6 +166,5 @@ poetry.toml
 .python-version
 
 # resolv-pipelines
-/infrastructure/orchestrator/logs
 /scripts/**/config/**/*.ini
 /scripts/**/config/**/*.json

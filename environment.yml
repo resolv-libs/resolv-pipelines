@@ -4,4 +4,10 @@ channels:
   - conda-forge
 dependencies:
   - python>=3.9,<3.12
+  - apache-beam=2.54.*
+  - matplotlib=3.8.*
   - pip
+  - pip:
+      - git+ssh://git@github.com/resolv-libs/resolv-data.git@main
+      - git+ssh://git@github.com/resolv-libs/resolv-mir.git@main
+      - git+ssh://git@github.com/resolv-libs/resolv-ml.git@main
