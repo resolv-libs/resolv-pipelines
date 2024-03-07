@@ -1,0 +1,9 @@
+{
+  "amount": 0,
+  "enabled": false,
+  "in_place": false,
+  "max_allowed_pitch": 127,
+  "min_allowed_pitch": 0,
+  "order": 1,
+  "transpose_chords": true
+}

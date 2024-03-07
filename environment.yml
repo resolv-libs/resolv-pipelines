@@ -1,0 +1,7 @@
+name: resolv-pipelines
+channels:
+  - defaults
+  - conda-forge
+dependencies:
+  - python>=3.9,<3.12
+  - pip

@@ -1,0 +1,8 @@
+{
+  "enabled": true,
+  "order": 1,
+  "skip_splits_inside_notes": false,
+  "keep_time_signatures": [
+    "4/4"
+  ]
+}
