@@ -3,8 +3,8 @@ import logging
 
 from resolv_data import DirectoryDataset
 from resolv_data import DATASET_TYPE_MAP
-from scripts import utilities
-from scripts.constants import Paths
+from scripts.utilities import config
+from scripts.utilities.constants import Paths
 
 
 def _build_arg_parser() -> argparse.ArgumentParser:
@@ -21,8 +21,8 @@ if __name__ == '__main__':
     arg_parser = _build_arg_parser()
     known_args, _ = arg_parser.parse_known_args()
     logging.getLogger().setLevel(logging.INFO)
-    conf_file_path = Paths.DATASET_IMPORT_CONFIG_DIR / known_args.config_file_name
-    importer_config = utilities.load_configuration_section(conf_file_path, 'Main')
+    conf_file_path = Paths.DATA_IMPORT_CONFIG_DIR / known_args.config_file_name
+    importer_config = config.load_configuration_section(conf_file_path, 'Main')
     logging.getLogger().setLevel(importer_config.get('logging_level'))
 
     output_path = importer_config.get('output_path') if importer_config.get('output_path') \

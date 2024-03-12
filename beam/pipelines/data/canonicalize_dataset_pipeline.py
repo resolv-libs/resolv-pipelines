@@ -47,7 +47,7 @@ from google.protobuf.json_format import Parse
 from resolv_data import DatasetIndex
 from resolv_data.canonical import get_canonical_format_by_source_type
 from beam.dofn.base import DoFnDebugConfig
-from beam.dofn.canonical import ReadDatasetEntryFileDoFn, ToCanonicalFormatDoFn
+from beam.dofn.data.canonical import ReadDatasetEntryFileDoFn, ToCanonicalFormatDoFn
 from beam.dofn.utilities import CountElementsDoFn
 
 

@@ -40,7 +40,7 @@ import apache_beam.metrics as beam_metrics
 from apache_beam.options.pipeline_options import PipelineOptions
 
 from resolv_mir import NoteSequence
-from beam.dofn.metrics import METRIC_DO_FN_MAP
+from beam.dofn.mir.symbolic_music.metrics import METRIC_DO_FN_MAP
 from beam.dofn.utilities import CountElementsDoFn, GenerateHistogram, WriteFileToFileSystem
 
 

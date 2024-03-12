@@ -69,7 +69,7 @@ from apache_beam.options.pipeline_options import PipelineOptions
 
 from resolv_mir import NoteSequence
 from beam.dofn.base import DoFnDebugConfig, DebugOutputTypeEnum
-from beam.dofn.note_sequence import NS_DO_FN_MAP, DistinctNoteSequences
+from beam.dofn.mir.symbolic_music.processors import NS_DO_FN_MAP, DistinctNoteSequences
 from beam.dofn.utilities import CountElementsDoFn
 
 

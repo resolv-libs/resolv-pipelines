@@ -5,9 +5,10 @@ from pathlib import Path
 from typing import List, Union
 
 from resolv_data import get_dataset_root_dir_name
-from scripts import utilities, constants
+from scripts.utilities import config, constants
+from scripts.utilities import beam as beam_utils
 
-PY_FILE_PATH = str(constants.Paths.BEAM_PIPELINES_DIR / 'canonicalize_dataset_pipeline.py')
+PY_FILE_PATH = str(constants.Paths.DATA_BEAM_PIPELINES_DIR / 'canonicalize_dataset_pipeline.py')
 
 
 def _build_arg_parser() -> argparse.ArgumentParser:
@@ -22,7 +23,7 @@ def _build_arg_parser() -> argparse.ArgumentParser:
 
 
 def _get_beam_pipeline_cmd(config_file_path: Union[str, Path]) -> List[str]:
-    canonicalizer_config = utilities.load_configuration_section(config_file_path, 'Main')
+    canonicalizer_config = config.load_configuration_section(config_file_path, 'Main')
     cmd = [constants.System.PY_INTERPRETER, PY_FILE_PATH]
 
     dataset_index_paths = []
@@ -41,9 +42,9 @@ def _get_beam_pipeline_cmd(config_file_path: Union[str, Path]) -> List[str]:
         dataset_output_path = f'{output_path}/{dataset_root_dir}/{dataset_file_type}'
         dataset_output_paths.append(dataset_output_path)
 
-    runner_args = utilities.get_runner_args_for_beam_pipeline(conf_file_path)
+    runner_args = beam_utils.get_runner_args_for_beam_pipeline(conf_file_path)
     cmd.extend(runner_args)
-    pipeline_args = utilities.beam_options_to_args({
+    pipeline_args = beam_utils.beam_options_to_args({
         'dataset_index_file_paths': ','.join(dataset_index_paths),
         'dataset_output_paths': ','.join(dataset_output_paths),
         'dataset_file_types': ','.join(dataset_file_types),
@@ -62,6 +63,6 @@ if __name__ == '__main__':
     known_args, _ = arg_parser.parse_known_args()
     logging.getLogger().setLevel(logging.INFO)
     os.chdir(constants.Paths.ROOT_DIR)
-    conf_file_path = constants.Paths.DATASET_CANONICALIZER_CONFIG_DIR / known_args.config_file_name
+    conf_file_path = constants.Paths.DATA_CANONICALIZER_CONFIG_DIR / known_args.config_file_name
     beam_cmd = _get_beam_pipeline_cmd(conf_file_path)
-    utilities.run_beam_cmd(beam_cmd)
+    beam_utils.run_beam_cmd(beam_cmd)

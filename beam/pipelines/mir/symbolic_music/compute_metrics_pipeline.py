@@ -66,7 +66,7 @@ from apache_beam.options.pipeline_options import PipelineOptions
 
 from resolv_mir import NoteSequence
 from beam.dofn.base import DoFnDebugConfig
-from beam.dofn.metrics import METRIC_DO_FN_MAP
+from beam.dofn.mir.symbolic_music.metrics import METRIC_DO_FN_MAP
 from beam.dofn.utilities import CountElementsDoFn
 
 

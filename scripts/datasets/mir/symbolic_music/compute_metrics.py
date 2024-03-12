@@ -5,11 +5,12 @@ import os
 from pathlib import Path
 from typing import List, Union
 
-from beam.dofn.metrics import METRIC_DO_FN_MAP
+from beam.dofn.mir.symbolic_music.metrics import METRIC_DO_FN_MAP
 from resolv_data import get_dataset_root_dir_name
-from scripts import utilities, constants
+from scripts.utilities import config, constants
+from scripts.utilities import beam as beam_utils
 
-PY_FILE_PATH = str(constants.Paths.BEAM_PIPELINES_DIR / 'compute_metrics_pipeline.py')
+PY_FILE_PATH = str(constants.Paths.SYMBOLIC_MUSIC_BEAM_PIPELINES_DIR / 'compute_metrics_pipeline.py')
 
 
 def _build_arg_parser() -> argparse.ArgumentParser:
@@ -23,7 +24,7 @@ def _build_arg_parser() -> argparse.ArgumentParser:
 
 
 def _get_beam_pipeline_cmd(config_file_path: Union[str, Path]) -> List[str]:
-    metrics_config = utilities.load_configuration_section(config_file_path, 'Main')
+    metrics_config = config.load_configuration_section(config_file_path, 'Main')
     cmd = [constants.System.PY_INTERPRETER, PY_FILE_PATH]
 
     source_datasets_dir_names = [
@@ -41,7 +42,7 @@ def _get_beam_pipeline_cmd(config_file_path: Union[str, Path]) -> List[str]:
     metrics_configs = {}
     metrics_config_dir = metrics_config.get('metrics_config_dir')
     if metrics_config_dir:
-        metric_config_dir_path = constants.Paths.DATASET_METRICS_CONFIG_DIR / metrics_config_dir
+        metric_config_dir_path = constants.Paths.SYMBOLIC_MUSIC_DATASET_METRICS_CONFIG_DIR / metrics_config_dir
         if not metric_config_dir_path.is_dir():
             raise ValueError(f'Specified processors configuration directory {metric_config_dir_path} not valid.')
         else:
@@ -53,10 +54,10 @@ def _get_beam_pipeline_cmd(config_file_path: Union[str, Path]) -> List[str]:
                 else:
                     logging.warning(f'No configuration file for processor {metric_id} specified in '
                                     f'{metric_config_dir_path}. Ignoring it.')
-            metrics_flags = utilities.beam_options_to_args(metrics_configs)
-            runner_args = utilities.get_runner_args_for_beam_pipeline(conf_file_path)
+            metrics_flags = beam_utils.beam_options_to_args(metrics_configs)
+            runner_args = beam_utils.get_runner_args_for_beam_pipeline(conf_file_path)
             cmd.extend(runner_args)
-            pipeline_args = utilities.beam_options_to_args({
+            pipeline_args = beam_utils.beam_options_to_args({
                 'source_dataset_paths': ','.join(source_dataset_paths),
                 'force_overwrite': metrics_config.get('force_overwrite'),
                 'logging_level': metrics_config.get('logging_level'),
@@ -74,6 +75,6 @@ if __name__ == '__main__':
     known_args, _ = arg_parser.parse_known_args()
     logging.getLogger().setLevel(logging.INFO)
     os.chdir(constants.Paths.ROOT_DIR)
-    conf_file_path = constants.Paths.DATASET_METRICS_CONFIG_DIR / known_args.config_file_name
+    conf_file_path = constants.Paths.SYMBOLIC_MUSIC_DATASET_METRICS_CONFIG_DIR / known_args.config_file_name
     beam_cmd = _get_beam_pipeline_cmd(conf_file_path)
-    utilities.run_beam_cmd(beam_cmd)
+    beam_utils.run_beam_cmd(beam_cmd)
