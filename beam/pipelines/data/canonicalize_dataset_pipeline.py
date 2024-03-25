@@ -156,7 +156,8 @@ def run_pipelines():
             _ = (
                     pipeline
                     | 'CreateDatasetTracksPColl' >> beam.Create(dataset_entries)
-                    | 'ReadDatasetEntryFile' >> beam.ParDo(ReadDatasetEntryFileDoFn(file_type=dataset_file_type))
+                    | 'ReadDatasetEntryFile' >> beam.ParDo(ReadDatasetEntryFileDoFn(dataset_name=dataset_index.id,
+                                                                                    file_type=dataset_file_type))
                     | 'ToCanonicalFormat' >> beam.ParDo(ToCanonicalFormatDoFn(debug_config=debug_do_fn_config))
                     | 'CountElements' >> beam.ParDo(CountElementsDoFn(name='num_processed_sequences'))
                     | 'WriteToTFRecord' >> beam.io.WriteToTFRecord(

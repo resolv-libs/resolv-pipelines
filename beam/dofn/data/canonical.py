@@ -36,14 +36,16 @@ class ReadDatasetEntryFileDoFn(beam.DoFn):
     Args:
         file_type (str): Type of the file to read from the DatasetEntry message. Only entries with 'key=file_type' in
             'entry.files' will be considered.
+        dataset_name (str): Name of the dataset from which the entry is taken.
 
     Methods:
         process(element, *args, **kwargs): Reads the file and yields its content along with metadata.
     """
 
-    def __init__(self, file_type: str):
+    def __init__(self, file_type: str, dataset_name: str):
         super(ReadDatasetEntryFileDoFn, self).__init__()
         self._file_type = file_type
+        self._dataset_name = dataset_name
 
     def process(self, element, *args, **kwargs):
         """
@@ -64,7 +66,7 @@ class ReadDatasetEntryFileDoFn(beam.DoFn):
             dict_metadata = MessageToDict(metadata, metadata_type)
         file = element.files[self._file_type]
         path = file.path
-        dict_metadata.update({'id': Path(element.id).name, 'filepath': path})
+        dict_metadata.update({'id': Path(element.id).name, 'filepath': path, 'collection_name': self._dataset_name})
         with FileSystems.open(path) as f:
             source_type = Path(path).suffix
             yield f.read(), source_type, dict_metadata
