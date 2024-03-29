@@ -1,5 +1,4 @@
 """ TODO - module doc """
-import logging
 from abc import ABC, abstractmethod
 from typing import List, Dict, Any
 
@@ -145,7 +144,6 @@ class TransposeAugmenterDoFn(AugmentNoteSequenceDoFn):
                                                           transpose_chords=self._config['transpose_chords'],
                                                           in_place=self._config['in_place'],
                                                           delete_notes=self._config['delete_notes']))
-        logging.info(transposed_ns.total_quantized_steps, note_sequence.total_quantized_steps)
         self.statistics['deleted_notes'].update(del_notes)
         if not transposed_ns.notes:
             self.statistics['skipped_due_to_range_exceeded'].inc()

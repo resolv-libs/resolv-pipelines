@@ -1,4 +1,6 @@
+import logging
 from abc import ABC, abstractmethod
+from typing import Dict
 
 import apache_beam as beam
 import tensorflow as tf
@@ -21,11 +23,21 @@ class NoteSequenceRepresentationDoFn(ABC, beam.DoFn):
     def process(self, note_sequence: NoteSequence, *args, **kwargs):
         sequence_example = self._process_internal(note_sequence)
         if self._keep_attributes:
-            context_features = {metric: tf.train.Feature(float_list=tf.train.FloatList(value=[value]))
-                                for metric, value in note_sequence.metrics.ListFields()}
-            context = tf.train.Features(feature=context_features)
+            context = tf.train.Features(feature=self._get_attributes_features(note_sequence))
             sequence_example.context.CopyFrom(context)
         yield sequence_example
+
+    @staticmethod
+    def _get_attributes_features(note_sequence: NoteSequence) -> Dict[str, tf.train.Feature]:
+        field_values = {}
+        sequence_attributes = note_sequence.metrics
+        for field_descriptor in NoteSequence.SequenceMetrics.DESCRIPTOR.fields:
+            field_name = field_descriptor.name
+            field_value = getattr(sequence_attributes, field_name)
+            if not field_value:
+                field_value = tf.keras.backend.epsilon()
+            field_values[field_name] = tf.train.Feature(float_list=tf.train.FloatList(value=[field_value]))
+        return field_values
 
 
 class PitchSequenceRepresentationDoFn(NoteSequenceRepresentationDoFn):

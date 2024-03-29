@@ -32,7 +32,7 @@ def _build_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         '--keep_attributes',
         dest='keep_attributes',
-        action='store_false',
+        action='store_true',
         help='Whether to to store the attributes related to the sequence in the example contest.')
     parser.add_argument(
         '--force_overwrite',

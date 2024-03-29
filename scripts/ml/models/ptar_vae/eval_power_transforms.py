@@ -3,23 +3,28 @@ import os
 import keras
 import matplotlib.pyplot as plt
 import tensorflow as tf
+
 from resolv_mir import NoteSequence
 from resolv_ml.utilities.statistic.power_transforms import BoxCox
 
 from scripts.utilities.constants import Paths
 
-_DATASET_FILE_PATTERN = (Paths.GENERATED_DATASETS_DIR / '4bars_melodies_distinct' / 'lakh_midi-v1.0.0-clean' / 'midi' /
-                         'metrics-*.tfrecord')
+_DATASET_FILE_PATTERN = (Paths.GENERATED_DATASETS_DIR /
+                         '4bars_melodies/jsb_chorales-v1.0.0-full/mxml/representation-*.tfrecord')
 
 
-@tf.py_function(Tout=tf.float32)
-def parse_tfrecord(serialized_example):
-    note_sequence: NoteSequence = NoteSequence.FromString(serialized_example.numpy())
-    note_change_ratio = note_sequence.metrics.note_change_ratio
-    metric_tensor = tf.cast(note_change_ratio, tf.float32)
-    if note_change_ratio == 0:
-        metric_tensor = tf.add(metric_tensor, tf.keras.backend.epsilon())
-    return metric_tensor
+def parse_sequence_example(serialized_example):
+    context_features = {metric: tf.io.FixedLenFeature([], dtype=tf.float32)
+                        for metric in [field.name for field in NoteSequence.SequenceMetrics.DESCRIPTOR.fields]}
+    sequence_features = {
+        "pitch_seq": tf.io.FixedLenSequenceFeature([64], dtype=tf.int64),
+    }
+    context_parsed, sequence_parsed = tf.io.parse_single_sequence_example(
+        serialized_example,
+        context_features=context_features,
+        sequence_features=sequence_features
+    )
+    return context_parsed, sequence_parsed
 
 
 def plot_distribution(x, output_fig_name: str):
@@ -48,7 +53,7 @@ if __name__ == '__main__':
     options.experimental_optimization.apply_default_optimizations = True
     files = tf.data.Dataset.list_files(str(_DATASET_FILE_PATTERN)).with_options(options)
     dataset = files.interleave(tf.data.TFRecordDataset)
-    dataset = dataset.map(parse_tfrecord)
+    dataset = dataset.map(parse_sequence_example)
     dataset = dataset.batch(batch_size=batch_size, drop_remainder=True)
 
     box_cox_model = BoxCoxModel()
