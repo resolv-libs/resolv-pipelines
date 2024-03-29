@@ -1,4 +1,5 @@
 """ TODO - module doc """
+import logging
 from abc import ABC, abstractmethod
 from typing import List, Dict, Any
 
@@ -136,14 +137,15 @@ class TransposeAugmenterDoFn(AugmentNoteSequenceDoFn):
                 max_transpose = clamp_transpose_amount(max_transpose, ns_min_pitch, ns_max_pitch)
             return np.random.randint(min_transpose, max_transpose)
 
-        transposed_ns, del_notes = (
-            processors.transposer.transpose_note_sequence(note_sequence,
-                                                          amount=get_transpose_amount(),
-                                                          min_allowed_pitch=self._config['min_allowed_pitch'],
-                                                          max_allowed_pitch=self._config['max_allowed_pitch'],
-                                                          transpose_chords=self._config['transpose_chords'],
-                                                          in_place=self._config['in_place'],
-                                                          delete_notes=self._config['delete_notes']))
+        transposed_ns, del_notes = processors.transposer.transpose_note_sequence(
+            note_sequence,
+            amount=get_transpose_amount(),
+            min_allowed_pitch=self._config['min_allowed_pitch'],
+            max_allowed_pitch=self._config['max_allowed_pitch'],
+            transpose_chords=self._config['transpose_chords'],
+            in_place=self._config['in_place'],
+            delete_notes=self._config['delete_notes']
+        )
         self.statistics['deleted_notes'].update(del_notes)
         if not transposed_ns.notes:
             self.statistics['skipped_due_to_range_exceeded'].inc()

@@ -24,15 +24,15 @@ from pathlib import Path
 from typing import List, Dict, Any
 
 import apache_beam as beam
-from apache_beam.io.filesystems import FileSystems
 from apache_beam.internal.metrics.metric import Metrics as internal_beam_metrics
+from apache_beam.io.filesystems import FileSystems
 from apache_beam.metrics import Metrics as beam_metrics
 from apache_beam.utils.histogram import LinearBucket
 from google.protobuf.json_format import MessageToJson
-from resolv_mir.protobuf import NoteSequence
-from resolv_mir.note_sequence import exceptions, constants, processors
-
 from resolv_data.canonical import to_source_format
+from resolv_mir.note_sequence import exceptions, constants, processors
+from resolv_mir.protobuf import NoteSequence
+
 from beam.dofn.base import ConfigurableDoFn, DoFnDebugConfig, DebugOutputTypeEnum
 
 
@@ -347,9 +347,10 @@ class TimeChangeSplitDoFn(NoteSequenceDoFn):
         }
 
     def _process_internal(self, note_sequence: NoteSequence) -> List[NoteSequence]:
-        split_sequences = processors.splitter.split_note_sequence_on_time_changes(note_sequence,
-                                                                                  skip_splits_inside_notes=self._config[
-                                                                                      'skip_splits_inside_notes'])
+        split_sequences = processors.splitter.split_note_sequence_on_time_changes(
+            note_sequence,
+            self._config['skip_splits_inside_notes']
+        )
         # Filter sequences that do not match a time signature in 'keep_time_signatures'
         if self._config['keep_time_signatures']:
             filtered_sequences = []
@@ -419,17 +420,27 @@ class SliceDoFn(NoteSequenceDoFn):
             'slice_size_bars': 2,
             'start_time': 0,
             'skip_splits_inside_notes': False,
-            'allow_cropped_slices': False
+            'allow_cropped_slices': False,
+            'keep_shorter_slices': True
         }
 
     def _init_statistics_internal(self):
-        return None
+        return {
+            'shorter_slices': beam_metrics.counter(self.namespace(), 'shorter_slices')
+        }
 
     def _process_internal(self, note_sequence: NoteSequence) -> List[NoteSequence]:
-        return processors.slicer.slice_note_sequence_in_bars(note_sequence, self._config['slice_size_bars'],
-                                                             self._config['hop_size_bars'], self._config['start_time'],
-                                                             self._config['skip_splits_inside_notes'],
-                                                             self._config['allow_cropped_slices'])
+        sliced_sequences, shorter_slice_count = processors.slicer.slice_note_sequence_in_bars(
+            note_sequence,
+            slice_size_bars=self._config['slice_size_bars'],
+            hop_size_bars=self._config['hop_size_bars'],
+            start_time=self._config['start_time'],
+            skip_splits_inside_notes=self._config['skip_splits_inside_notes'],
+            allow_cropped_slices=self._config['allow_cropped_slices'],
+            keep_shorter_slices=self._config['keep_shorter_slices']
+        )
+        self.statistics['shorter_slices'].inc(shorter_slice_count)
+        return sliced_sequences
 
 
 class StretchDoFn(NoteSequenceDoFn):
@@ -460,8 +471,9 @@ class StretchDoFn(NoteSequenceDoFn):
         return None
 
     def _process_internal(self, note_sequence: NoteSequence) -> List[NoteSequence]:
-        return [processors.stretcher.stretch_note_sequence(note_sequence, self._config['stretch_factor'],
-                                                           self._config['in_place'])]
+        return [processors.stretcher.stretch_note_sequence(note_sequence,
+                                                           stretch_factor=self._config['stretch_factor'],
+                                                           in_place=self._config['in_place'])]
 
 
 class SustainDoFn(NoteSequenceDoFn):
