@@ -3,6 +3,7 @@ from pathlib import Path
 from typing import Callable, Union
 
 import tensorflow as tf
+from resolv_mir import NoteSequence
 
 from scripts.ml.data_loaders.base import DataLoader
 
@@ -83,6 +84,13 @@ class TFRecordLoader(DataLoader):
             num_parallel_reads=None,
             name='LoadTFRecordDataset'
         ).with_options(_get_dataset_options())
+
+        _SEQUENCE_LENGTH = 64
+        context_features = {metric: tf.io.FixedLenFeature([], dtype=tf.float32)
+                            for metric in [field.name for field in NoteSequence.SequenceMetrics.DESCRIPTOR.fields]}
+        sequence_features = {
+            "pitch_seq": tf.io.FixedLenSequenceFeature([_SEQUENCE_LENGTH], dtype=tf.int64),
+        }
 
         if self._decode_fn:
             dataset = dataset.map(self._decode_fn,
