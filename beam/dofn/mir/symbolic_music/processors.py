@@ -97,7 +97,7 @@ class NoteSequenceDoFn(ConfigurableDoFn, ABC):
             default_metrics.update(internal_metrics)
         return default_metrics
 
-    def process(self, note_sequence, *args, **kwargs):
+    def process(self, note_sequence: NoteSequence, *args, **kwargs):
         """
         Process a single NoteSequence object, updates statistics and writes debug info if necessary.
 
@@ -519,7 +519,8 @@ class TransposeDoFn(NoteSequenceDoFn):
             'min_allowed_pitch': constants.MIN_MIDI_PITCH,
             'max_allowed_pitch': constants.MAX_MIDI_PITCH,
             'transpose_chords': True,
-            'in_place': False
+            'delete_notes': True,
+            'in_place': False,
         }
 
     def _init_statistics_internal(self):
@@ -532,16 +533,18 @@ class TransposeDoFn(NoteSequenceDoFn):
         transposed_ns, del_notes = (
             processors.transposer.transpose_note_sequence(note_sequence,
                                                           amount=self._config['amount'],
-                                                          min_allowed_pitch=self._config['stretch_factor'],
+                                                          min_allowed_pitch=self._config['min_allowed_pitch'],
                                                           max_allowed_pitch=self._config['max_allowed_pitch'],
                                                           transpose_chords=self._config['transpose_chords'],
+                                                          delete_notes=self._config['delete_notes'],
                                                           in_place=self._config['in_place']))
         self.statistics['deleted_notes'].update(del_notes)
         if not transposed_ns.notes:
             self.statistics['skipped_due_to_range_exceeded'].inc()
+            return []
         else:
             self.statistics['transpositions_generated'].inc()
-        return [transposed_ns]
+            return [transposed_ns]
 
 
 class DebugNoteSequenceDoFn(NoteSequenceDoFn):

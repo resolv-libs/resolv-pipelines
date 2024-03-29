@@ -116,7 +116,7 @@ def run_pipelines(argv=None) -> List[beam.Pipeline]:
             | f'WriteHistogram' >> beam.ParDo(WriteFileToFileSystem(f'{source_dataset_path}/histograms', "image/png"))
         )
 
-        # Wait for pipeline to finish
+        # Wait for the pipeline to finish
         results = pipeline.run()
         results.wait_until_finish()
 

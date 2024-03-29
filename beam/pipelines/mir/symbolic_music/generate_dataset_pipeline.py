@@ -175,16 +175,16 @@ def run_pipelines() -> List[beam.Pipeline]:
         output_dir = f'{output_path}/data'
         file_suffix = '.tfrecord'
         match_results = FileSystems.match([f'{output_dir}-*-*-*{file_suffix}'])
-        existing_canonical_paths = [metadata.path for metadata in match_results[0].metadata_list]
-        if existing_canonical_paths:
+        existing_generated_paths = [metadata.path for metadata in match_results[0].metadata_list]
+        if existing_generated_paths:
             if not known_args.force_overwrite:
                 logging.info(f'Skipping generation for source dataset {source_path}.'
-                             f'Found existing files: {existing_canonical_paths}.'
+                             f'Found existing files: {existing_generated_paths}.'
                              f'To overwrite them execute pipeline with --force-overwrite flag.')
                 continue
             else:
-                logging.info(f'Deleting exising dataset {existing_canonical_paths}.')
-                FileSystems.delete(existing_canonical_paths)
+                logging.info(f'Deleting exising dataset {existing_generated_paths}.')
+                FileSystems.delete(existing_generated_paths)
 
         # Read note sequences
         input_ns = pipeline | 'ReadTFRecord' >> beam.io.ReadFromTFRecord(source_path,
@@ -222,7 +222,7 @@ def run_pipelines() -> List[beam.Pipeline]:
                     file_name_suffix=file_suffix,
                     coder=beam.coders.ProtoCoder(NoteSequence)))
 
-        # Wait for pipeline to finish
+        # Wait for the pipeline to finish
         results = pipeline.run()
         results.wait_until_finish()
 

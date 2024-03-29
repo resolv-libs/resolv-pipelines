@@ -58,7 +58,6 @@ class ReadDatasetEntryFileDoFn(beam.DoFn):
         Yields:
             Tuple: Tuple containing file content, original file type, and metadata.
         """
-
         metadata_type = element.WhichOneof('metadata')
         dict_metadata = {}
         if metadata_type:
@@ -77,7 +76,7 @@ class ReadDatasetEntryFileDoFn(beam.DoFn):
 class ToCanonicalFormatDoFn(ConfigurableDoFn):
     """
     Apache Beam DoFn for converting data to a CanonicalFormat. The output CanonicalFormat is implicitly chosen by the
-    input file type. For example MIDI files are converted to the NoteSequence format. The association is defined in the
+    input file type. For example, MIDI files are converted to the NoteSequence format. The association is defined in the
     'canonical' module.
 
     Inherits:

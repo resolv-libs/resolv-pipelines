@@ -43,6 +43,7 @@ class Paths:
     SYMBOLIC_MUSIC_DATASET_CONFIG_DIR = SYMBOLIC_MUSIC_DATASET_SCRIPTS_DIR / 'config'
     SYMBOLIC_MUSIC_DATASET_GENERATOR_CONFIG_DIR = SYMBOLIC_MUSIC_DATASET_CONFIG_DIR / 'generator'
     SYMBOLIC_MUSIC_DATASET_METRICS_CONFIG_DIR = SYMBOLIC_MUSIC_DATASET_CONFIG_DIR / 'metrics'
+    SYMBOLIC_MUSIC_DATASET_REPR_CONFIG_DIR = SYMBOLIC_MUSIC_DATASET_CONFIG_DIR / 'representation'
     # DEFAULT OUTPUT DIRECTORIES
     DATASETS_DIR = RESOURCES_DIR / 'datasets'
     RAW_DATASETS_DIR = DATASETS_DIR / 'raw'
@@ -50,7 +51,6 @@ class Paths:
     GENERATED_DATASETS_DIR = DATASETS_DIR / 'generated'
 
     # ------------ MACHINE LEARNING ------------
-
 
 class BEAMConfigSections:
     """ Constants that indicate the sections in the configuration file that are relative to the BEAM pipelines. """

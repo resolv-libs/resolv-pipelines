@@ -184,7 +184,7 @@ def run_pipelines(argv=None) -> List[beam.Pipeline]:
                     file_name_suffix='.tfrecord',
                     coder=beam.coders.ProtoCoder(NoteSequence)))
 
-        # Wait for pipeline to finish
+        # Wait for the pipeline to finish
         results = pipeline.run()
         results.wait_until_finish()
 

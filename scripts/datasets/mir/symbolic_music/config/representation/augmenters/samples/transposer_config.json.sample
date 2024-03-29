@@ -1,0 +1,12 @@
+{
+  "enabled": true,
+  "order": 1,
+  "threshold": 0.7,
+  "min_transpose_amount": -12,
+  "max_transpose_amount": 12,
+  "max_allowed_pitch": 108,
+  "min_allowed_pitch": 21,
+  "transpose_chords": false,
+  "delete_notes": false,
+  "in_place": true
+}
