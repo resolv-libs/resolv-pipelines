@@ -1,0 +1,56 @@
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+package-mode = true
+name = "resolv-pipelines"
+version = "0.0.0.dev1"
+description = "A package for Resolv containing pipeines for generating datasets and training ML models."
+license = "Apache-2.0"
+authors = [
+    "Matteo Pettenò <matteo.petteno1@gmail.com>"
+]
+maintainers = [
+    "Matteo Pettenò <matteo.petteno1@gmail.com>"
+]
+readme = ["README.md", "src/README.md", "docs/README.md", "tests/README.md"]
+homepage = "https://github.com/resolv-libs/resolv-pipelines"
+documentation = "https://github.com/resolv-libs/resolv-pipelines/docs"
+repository = "https://github.com/resolv-libs/resolv-pipelines"
+keywords = [
+    "resolv", "rersolv-libs", "resolv-pipelines",
+    "datasets", "pipelines", "machine-learning",
+    "apache-beam"
+]
+classifiers = [
+    "Development Status :: 2 - Pre-Alpha",
+    "Intended Audience :: Information Technology",
+    "Intended Audience :: Science/Research",
+    "Operating System :: OS Independent"
+]
+packages = [
+    { include = "resolv_pipelines", from = "src" },
+]
+include = ["CHANGELOG.md"]
+
+[tool.poetry.dependencies]
+python = ">=3.9,<3.12"
+apache-beam = "^2.55.0"
+matplotlib = "^3.8.2"
+resolv-data = {git = "ssh://git@github.com/resolv-libs/resolv-data.git", rev = "main"}
+resolv-mir = {git = "ssh://git@github.com/resolv-libs/resolv-mir.git", rev = "main"}
+python-snappy = { version = "0.6.1", optional = true }
+
+[tool.poetry.group.dev.dependencies]
+
+[tool.poetry.group.test.dependencies]
+
+[tool.poetry.group.docs.dependencies]
+
+[tool.poetry.extras]
+snappy = ["python-snappy"]
+
+[tool.poetry.plugins]
+
+[tool.poetry.urls]

@@ -165,6 +165,4 @@ poetry.toml
 # Pyenv
 .python-version
 
-# resolv-pipelines
-/scripts/**/config/**/*.ini
-/scripts/**/config/**/*.json
+/tests/output/

@@ -1,7 +1,0 @@
-{
-  "enabled": false,
-  "hop_size_bars": 2,
-  "hop_size_seconds": null,
-  "order": 1,
-  "skip_splits_inside_notes": false
-}
