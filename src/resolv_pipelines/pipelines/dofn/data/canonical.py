@@ -23,8 +23,8 @@ from google.protobuf.json_format import MessageToJson, MessageToDict
 from resolv_data import DatasetEntry
 
 from ..base import ConfigurableDoFn, DoFnDebugConfig
-from ...canonical import CanonicalFormat, to_canonical_format
-from ...canonical.exceptions import CanonicalizationError
+from resolv_pipelines.canonical import CanonicalFormat, to_canonical_format
+from resolv_pipelines.canonical.exceptions import CanonicalizationError
 
 
 @beam.typehints.with_input_types(DatasetEntry)

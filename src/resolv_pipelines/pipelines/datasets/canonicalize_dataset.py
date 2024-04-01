@@ -10,20 +10,27 @@ from google.protobuf.json_format import Parse
 from resolv_data import DatasetIndex
 
 from .base import DatasetPipeline
-from ...dofn.base import DoFnDebugConfig
-from ...dofn.data.canonical import ReadDatasetEntryFileDoFn, ToCanonicalFormatDoFn
-from ...dofn.utilities import CountElementsDoFn
+from ..dofn.base import DoFnDebugConfig
+from ..dofn.data.canonical import ReadDatasetEntryFileDoFn, ToCanonicalFormatDoFn
+from ..dofn.utilities import CountElementsDoFn
 from ...canonical import get_canonical_format_by_source_type
 
 
 class CanonicalizeDatasetPipeline(DatasetPipeline):
 
-    def __init__(self, source_dataset_names: List[str], source_dataset_modes: List[str],
-                 source_dataset_file_types: List[str], input_path: Union[str, Path], output_path: Union[str, Path],
+    def __init__(self,
+                 input_path: Union[str, Path],
+                 output_path: Union[str, Path],
+                 source_dataset_names: List[str],
+                 source_dataset_modes: List[str],
+                 source_dataset_file_types: List[str],
                  input_path_prefix: str = "",
                  output_path_prefix: str = "",
-                 force_overwrite: bool = False, logging_level: str = 'INFO', debug: bool = False,
-                 debug_file_pattern: str = ".*", pipeline_options: Dict[str, str] = None):
+                 force_overwrite: bool = False,
+                 logging_level: str = 'INFO',
+                 debug: bool = False,
+                 debug_file_pattern: str = ".*",
+                 pipeline_options: Dict[str, str] = None):
         super(CanonicalizeDatasetPipeline, self).__init__(
             input_path=input_path,
             output_path=output_path,

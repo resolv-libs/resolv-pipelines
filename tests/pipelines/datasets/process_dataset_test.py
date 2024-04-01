@@ -4,8 +4,8 @@ from typing import Dict, Any
 
 from resolv_mir import note_sequence, NoteSequence
 
-from resolv_pipelines.dofn.mir.symbolic_music.attributes import ATTRIBUTE_DO_FN_MAP
-from resolv_pipelines.dofn.mir.symbolic_music.processors import NS_DO_FN_MAP
+from resolv_pipelines.pipelines.dofn.mir.symbolic_music.attributes import ATTRIBUTE_DO_FN_MAP
+from resolv_pipelines.pipelines.dofn.mir.symbolic_music.processors import NS_DO_FN_MAP
 from resolv_pipelines.pipelines.datasets.process_dataset import ProcessDatasetPipeline
 
 
@@ -65,7 +65,7 @@ class ProcessDatasetPipelineTest(unittest.TestCase):
     def setUp(self):
         self.output_dir.mkdir(parents=True, exist_ok=True)
 
-    def test_process_dataset_pipeline(self):
+    def test_generate_dataset_pipeline(self):
         ProcessDatasetPipeline(
             canonical_format=NoteSequence,
             allowed_processors_map=NS_DO_FN_MAP,

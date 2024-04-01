@@ -3,7 +3,7 @@ from pathlib import Path
 
 from resolv_mir import NoteSequence
 
-from resolv_pipelines.dofn.mir.symbolic_music.attributes import ATTRIBUTE_DO_FN_MAP
+from resolv_pipelines.pipelines.dofn.mir.symbolic_music.attributes import ATTRIBUTE_DO_FN_MAP
 from resolv_pipelines.pipelines.datasets.utilities import DrawHistogramPipeline
 
 

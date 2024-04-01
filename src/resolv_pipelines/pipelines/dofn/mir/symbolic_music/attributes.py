@@ -60,7 +60,7 @@ from google.protobuf.json_format import MessageToJson
 
 from resolv_mir import NoteSequence
 from resolv_mir.note_sequence import constants, attributes
-from src.resolv_pipelines.dofn.base import ConfigurableDoFn, DoFnDebugConfig
+from resolv_pipelines.pipelines.dofn.base import ConfigurableDoFn, DoFnDebugConfig
 
 
 @beam.typehints.with_input_types(NoteSequence)

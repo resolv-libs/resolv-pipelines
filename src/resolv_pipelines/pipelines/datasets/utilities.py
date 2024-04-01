@@ -8,8 +8,8 @@ import apache_beam.metrics as beam_metrics
 
 from .base import DatasetPipeline
 from ...canonical import CanonicalFormat
-from ...dofn.base import ConfigurableDoFn
-from ...dofn.utilities import CountElementsDoFn, GenerateHistogram, WriteFileToFileSystem
+from ..dofn.base import ConfigurableDoFn
+from ..dofn.utilities import CountElementsDoFn, GenerateHistogram, WriteFileToFileSystem
 
 
 class DrawHistogramPipeline(DatasetPipeline):
@@ -18,10 +18,10 @@ class DrawHistogramPipeline(DatasetPipeline):
                  canonical_format: CanonicalFormat,
                  attributes: List[str],
                  allowed_attributes_map: Dict[str, ConfigurableDoFn.__class__],
+                 input_path: Union[str, Path],
                  source_dataset_names: List[str],
                  source_dataset_modes: List[str],
                  source_dataset_file_types: List[str],
-                 input_path: Union[str, Path],
                  input_path_prefix: str = "",
                  bins: List[int] = None,
                  force_overwrite: bool = False,

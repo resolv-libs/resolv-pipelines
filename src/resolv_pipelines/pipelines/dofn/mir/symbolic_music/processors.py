@@ -32,7 +32,7 @@ from google.protobuf.json_format import MessageToJson
 from resolv_mir.note_sequence import exceptions, constants, processors
 from resolv_mir.protobuf import NoteSequence
 
-from ....canonical import to_source_format
+from resolv_pipelines.canonical import to_source_format
 from ....dofn.base import ConfigurableDoFn, DoFnDebugConfig, DebugOutputTypeEnum
 
 

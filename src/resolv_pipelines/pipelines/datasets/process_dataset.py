@@ -8,20 +8,31 @@ import apache_beam.metrics as beam_metrics
 
 from .base import DatasetPipeline
 from ...canonical import CanonicalFormat
-from ...dofn.base import DoFnDebugConfig, DebugOutputTypeEnum, ConfigurableDoFn
-from ...dofn.mir.symbolic_music.processors import DistinctNoteSequences
-from ...dofn.utilities import CountElementsDoFn
+from ..dofn.base import DoFnDebugConfig, DebugOutputTypeEnum, ConfigurableDoFn
+from ..dofn.mir.symbolic_music.processors import DistinctNoteSequences
+from ..dofn.utilities import CountElementsDoFn
 
 
 class ProcessDatasetPipeline(DatasetPipeline):
 
-    def __init__(self, canonical_format: CanonicalFormat, allowed_processors_map: Dict[str, ConfigurableDoFn.__class__],
-                 processors_config: Dict[str, Dict], source_dataset_names: List[str], source_dataset_modes: List[str],
-                 source_dataset_file_types: List[str], input_path: Union[str, Path], output_path: Union[str, Path],
-                 distinct: bool = False, force_overwrite: bool = False, logging_level: str = 'INFO', debug: bool = False,
-                 debug_output_type: DebugOutputTypeEnum = DebugOutputTypeEnum.SOURCE, input_path_prefix: str = "",
+    def __init__(self,
+                 canonical_format: CanonicalFormat,
+                 allowed_processors_map: Dict[str, ConfigurableDoFn.__class__],
+                 processors_config: Dict[str, Dict],
+                 input_path: Union[str, Path],
+                 output_path: Union[str, Path],
+                 source_dataset_names: List[str],
+                 source_dataset_modes: List[str],
+                 source_dataset_file_types: List[str],
+                 input_path_prefix: str = "",
                  output_path_prefix: str = "data",
-                 debug_file_pattern: str = ".*", pipeline_options: Dict[str, str] = None):
+                 distinct: bool = False,
+                 force_overwrite: bool = False,
+                 logging_level: str = 'INFO',
+                 debug: bool = False,
+                 debug_output_type: DebugOutputTypeEnum = DebugOutputTypeEnum.SOURCE,
+                 debug_file_pattern: str = ".*",
+                 pipeline_options: Dict[str, str] = None):
         super(ProcessDatasetPipeline, self).__init__(
             input_path=input_path,
             output_path=output_path,
@@ -61,7 +72,7 @@ class ProcessDatasetPipeline(DatasetPipeline):
                                      dataset_output_path: Path):
         # Read inputs
         inputs = pipeline | 'ReadTFRecord' >> beam.io.ReadFromTFRecord(
-                                                            str(dataset_input_path / "*.tfrecord"),
+                                                            file_pattern=str(dataset_input_path / "*.tfrecord"),
                                                             coder=beam.coders.ProtoCoder(self._canonical_format))
 
         # TODO - Generate dataset pipeline: Logging progress DoFn
@@ -94,8 +105,9 @@ class ProcessDatasetPipeline(DatasetPipeline):
         )
 
         # Write note sequences
+        output_tfrecord_prefix = str(dataset_output_path / self._output_path_prefix)
         _ = (output_sequences
-             | 'WriteToTFRecord' >> beam.io.WriteToTFRecord(file_path_prefix=str(dataset_output_path / self._output_path_prefix),
+             | 'WriteToTFRecord' >> beam.io.WriteToTFRecord(file_path_prefix=output_tfrecord_prefix,
                                                             file_name_suffix=".tfrecord",
                                                             coder=beam.coders.ProtoCoder(self._canonical_format))
              )

@@ -38,6 +38,7 @@ include = ["CHANGELOG.md"]
 python = ">=3.9,<3.12"
 apache-beam = "^2.55.0"
 matplotlib = "^3.8.2"
+tensorflow = "^2.16.1"
 resolv-data = {git = "ssh://git@github.com/resolv-libs/resolv-data.git", rev = "main"}
 resolv-mir = {git = "ssh://git@github.com/resolv-libs/resolv-mir.git", rev = "main"}
 python-snappy = { version = "0.6.1", optional = true }

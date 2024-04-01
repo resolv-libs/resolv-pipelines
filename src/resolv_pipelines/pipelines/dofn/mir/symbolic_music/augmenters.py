@@ -8,7 +8,7 @@ from apache_beam.metrics import Metrics as beam_metrics
 from resolv_mir.protobuf import NoteSequence
 from resolv_mir.note_sequence import constants, processors
 
-from src.resolv_pipelines.dofn.base import ConfigurableDoFn, DoFnDebugConfig
+from resolv_pipelines.pipelines.dofn.base import ConfigurableDoFn, DoFnDebugConfig
 
 
 @beam.typehints.with_input_types(NoteSequence)
@@ -154,5 +154,5 @@ class TransposeAugmenterDoFn(AugmentNoteSequenceDoFn):
 
 # Dictionary mapping augmentation processor names to their respective classes
 NS_AUG_DO_FN_MAP = {
-    'transposer_ps_do_fn': TransposeAugmenterDoFn
+    'transposer': TransposeAugmenterDoFn
 }

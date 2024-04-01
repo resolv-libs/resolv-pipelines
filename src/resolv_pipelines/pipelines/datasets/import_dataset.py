@@ -6,7 +6,7 @@ import apache_beam as beam
 from resolv_data import import_directory_dataset
 
 from .base import DatasetPipeline
-from ...dofn import utilities
+from ..dofn import utilities
 
 
 class ImportArchiveDatasetPipeline(DatasetPipeline):
