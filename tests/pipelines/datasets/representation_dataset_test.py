@@ -44,7 +44,7 @@ class RepresentationDatasetPipelineTest(unittest.TestCase):
             source_dataset_modes=["full"],
             source_dataset_file_types=["mxml"],
             input_path=Path("./output/datasets/generated/4bars_melodies_distinct"),
-            input_path_prefix="metrics",
+            input_path_prefix="attributes",
             output_path=self.output_dir,
             output_path_prefix="pitchseq",
             output_dataset_name="4bars_melodies_distinct",

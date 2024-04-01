@@ -91,7 +91,7 @@ class ProcessDatasetPipelineTest(unittest.TestCase):
             input_path=Path("./output/datasets/generated/4bars_melodies_distinct"),
             input_path_prefix="data",
             output_path=self.output_dir,
-            output_path_prefix="metrics",
+            output_path_prefix="attributes",
             output_dataset_name="4bars_melodies_distinct",
             force_overwrite=True,
             debug=False

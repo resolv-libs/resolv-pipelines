@@ -23,7 +23,7 @@ class DrawHistogramsPipelineTest(unittest.TestCase):
             source_dataset_modes=["full"],
             source_dataset_file_types=["mxml"],
             input_path=self.input_dir,
-            input_path_prefix="metrics",
+            input_path_prefix="attributes",
             force_overwrite=True
         ).run_pipeline()
 
