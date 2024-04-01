@@ -16,12 +16,12 @@ class DrawHistogramPipeline(DatasetPipeline):
 
     def __init__(self,
                  canonical_format: CanonicalFormat,
-                 attributes: List[str],
                  allowed_attributes_map: Dict[str, ConfigurableDoFn.__class__],
                  input_path: Union[str, Path],
                  source_dataset_names: List[str],
                  source_dataset_modes: List[str],
                  source_dataset_file_types: List[str],
+                 attributes: List[str] = None,
                  input_path_prefix: str = "",
                  bins: List[int] = None,
                  force_overwrite: bool = False,
@@ -64,7 +64,10 @@ class DrawHistogramPipeline(DatasetPipeline):
         )
 
         # Draw histograms
-        attributes = [self._allowed_attributes_map[attribute].proto_message_id() for attribute in self._attributes]
+        if self._attributes:
+            attributes = [self._allowed_attributes_map[attribute].proto_message_id() for attribute in self._attributes]
+        else:
+            attributes = [attribute.proto_message_id() for attribute in self._allowed_attributes_map.values()]
         _ = (
             input_sequences
             | beam.FlatMap(lambda x: [(m, getattr(x.attributes, m)) for m in attributes])
