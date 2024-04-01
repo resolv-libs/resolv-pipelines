@@ -8,14 +8,15 @@ import apache_beam.metrics as beam_metrics
 
 from .base import DatasetPipeline
 from ...canonical import CanonicalFormat
-from ..dofn.base import DoFnDebugConfig, DebugOutputTypeEnum, ConfigurableDoFn, RepresentationDoFn
+from ..dofn.base import DoFnDebugConfig, DebugOutputTypeEnum, ConfigurableDoFn
 from ..dofn.utilities import CountElementsDoFn
+from ...data.representation.base import Representation
 
 
 class RepresentationDatasetPipeline(DatasetPipeline):
 
     def __init__(self,
-                 representation_do_fn: RepresentationDoFn,
+                 representation: Representation,
                  canonical_format: CanonicalFormat,
                  augmenters_config: Dict[str, Dict],
                  allowed_augmenters_map: Dict[str, ConfigurableDoFn.__class__],
@@ -24,6 +25,7 @@ class RepresentationDatasetPipeline(DatasetPipeline):
                  source_dataset_names: List[str],
                  source_dataset_modes: List[str],
                  source_dataset_file_types: List[str],
+                 output_dataset_name: str = "",
                  input_path_prefix: str = "",
                  output_path_prefix: str = "data",
                  force_overwrite: bool = False,
@@ -37,6 +39,7 @@ class RepresentationDatasetPipeline(DatasetPipeline):
             output_path=output_path,
             input_path_prefix=input_path_prefix,
             output_path_prefix=output_path_prefix,
+            output_dataset_name=output_dataset_name,
             source_dataset_names=source_dataset_names,
             source_dataset_modes=source_dataset_modes,
             source_dataset_file_types=source_dataset_file_types,
@@ -45,7 +48,7 @@ class RepresentationDatasetPipeline(DatasetPipeline):
             pipeline_options=pipeline_options
         )
         self._canonical_format = canonical_format
-        self._representation_do_fn = representation_do_fn
+        self._representation = representation
         self._allowed_augmenters_map = allowed_augmenters_map
         self._augmenters_config = augmenters_config
         self._debug = debug
@@ -54,7 +57,7 @@ class RepresentationDatasetPipeline(DatasetPipeline):
 
     @property
     def dataset_output_dir_name(self) -> str:
-        return "representation"
+        return f"representation/{self._output_dataset_name}"
 
     @property
     def augmenters_do_fn_map(self) -> Dict[ConfigurableDoFn.__class__, Dict[str, Any]]:
@@ -88,7 +91,7 @@ class RepresentationDatasetPipeline(DatasetPipeline):
             )
 
         # Apply representation
-        output_sequences = augmented_input_ns | beam.ParDo(self._representation_do_fn)
+        output_sequences = augmented_input_ns | beam.Map(self._representation.to_example)
 
         # Count output sequences
         output_sequences = (output_sequences

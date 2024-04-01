@@ -75,6 +75,7 @@ class ProcessDatasetPipelineTest(unittest.TestCase):
             source_dataset_file_types=["mxml"],
             input_path=Path("./output/datasets/canonical"),
             output_path=self.output_dir,
+            output_dataset_name="4bars_melodies_distinct",
             distinct=True,
             force_overwrite=True,
             debug=False
@@ -88,10 +89,11 @@ class ProcessDatasetPipelineTest(unittest.TestCase):
             source_dataset_names=["jsb-chorales-v1"],
             source_dataset_modes=["full"],
             source_dataset_file_types=["mxml"],
-            input_path=Path("./output/datasets/generated"),
+            input_path=Path("./output/datasets/generated/4bars_melodies_distinct"),
             input_path_prefix="data",
             output_path=self.output_dir,
             output_path_prefix="metrics",
+            output_dataset_name="4bars_melodies_distinct",
             force_overwrite=True,
             debug=False
         ).run_pipeline()

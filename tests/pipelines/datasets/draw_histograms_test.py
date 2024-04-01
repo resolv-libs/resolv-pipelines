@@ -11,7 +11,7 @@ class DrawHistogramsPipelineTest(unittest.TestCase):
 
     @property
     def input_dir(self) -> Path:
-        return Path("./output/datasets/generated")
+        return Path("./output/datasets/generated/4bars_melodies_distinct")
 
     def test_draw_histograms_pipeline(self):
         DrawHistogramPipeline(

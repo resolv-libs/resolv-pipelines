@@ -8,5 +8,5 @@ class DataLoader(ABC):
     """ TODO - Class DOC """
 
     @abstractmethod
-    def load_dataset(self, attribute: str) -> Any:
+    def load_dataset(self) -> Any:
         pass

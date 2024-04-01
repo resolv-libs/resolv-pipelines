@@ -7,10 +7,10 @@ import apache_beam as beam
 import apache_beam.metrics as beam_metrics
 
 from .base import DatasetPipeline
-from ...canonical import CanonicalFormat
 from ..dofn.base import DoFnDebugConfig, DebugOutputTypeEnum, ConfigurableDoFn
 from ..dofn.mir.symbolic_music.processors import DistinctNoteSequences
 from ..dofn.utilities import CountElementsDoFn
+from ...canonical import CanonicalFormat
 
 
 class ProcessDatasetPipeline(DatasetPipeline):
@@ -24,6 +24,7 @@ class ProcessDatasetPipeline(DatasetPipeline):
                  source_dataset_names: List[str],
                  source_dataset_modes: List[str],
                  source_dataset_file_types: List[str],
+                 output_dataset_name: str = "",
                  input_path_prefix: str = "",
                  output_path_prefix: str = "data",
                  distinct: bool = False,
@@ -38,6 +39,7 @@ class ProcessDatasetPipeline(DatasetPipeline):
             output_path=output_path,
             input_path_prefix=input_path_prefix,
             output_path_prefix=output_path_prefix,
+            output_dataset_name=output_dataset_name,
             source_dataset_names=source_dataset_names,
             source_dataset_modes=source_dataset_modes,
             source_dataset_file_types=source_dataset_file_types,
@@ -55,7 +57,7 @@ class ProcessDatasetPipeline(DatasetPipeline):
 
     @property
     def dataset_output_dir_name(self) -> str:
-        return "generated"
+        return f"generated/{self._output_dataset_name}"
 
     @property
     def processors_do_fn_map(self) -> Dict[ConfigurableDoFn.__class__, Dict[str, Any]]:
@@ -71,8 +73,9 @@ class ProcessDatasetPipeline(DatasetPipeline):
                                      dataset_input_path: Path,
                                      dataset_output_path: Path):
         # Read inputs
+        input_file_pattern = str(dataset_input_path / "*.tfrecord")
         inputs = pipeline | 'ReadTFRecord' >> beam.io.ReadFromTFRecord(
-                                                            file_pattern=str(dataset_input_path / "*.tfrecord"),
+                                                            file_pattern=input_file_pattern,
                                                             coder=beam.coders.ProtoCoder(self._canonical_format))
 
         # TODO - Generate dataset pipeline: Logging progress DoFn

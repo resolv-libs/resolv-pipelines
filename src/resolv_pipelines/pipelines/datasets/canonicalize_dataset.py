@@ -62,7 +62,7 @@ class CanonicalizeDatasetPipeline(DatasetPipeline):
             return get_canonical_format_by_source_type(source_type)
 
         dataset_file_type = source_dataset[2]
-        dataset_index_file_path = dataset_input_path / "index.json"
+        dataset_index_file_path = dataset_input_path.parent / "index.json"
         index_file = FileSystems.open(str(dataset_index_file_path))
         dataset_index = Parse(index_file.read(), DatasetIndex())
         dataset_entries = dataset_index.entries

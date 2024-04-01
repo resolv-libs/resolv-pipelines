@@ -17,6 +17,7 @@ class DatasetPipeline(ABC):
                  source_dataset_names: List[str],
                  source_dataset_modes: List[str],
                  source_dataset_file_types: List[str] = None,
+                 output_dataset_name: str = "",
                  input_path_prefix: str = "",
                  output_path_prefix: str = "",
                  force_overwrite: bool = False,
@@ -24,6 +25,7 @@ class DatasetPipeline(ABC):
                  pipeline_options: Dict[str, str] = None):
         self._input_path = Path(input_path) if input_path else None
         self._output_path = Path(output_path) if output_path else None
+        self._output_dataset_name = output_dataset_name
         self._input_path_prefix = input_path_prefix
         self._output_path_prefix = output_path_prefix
         if not source_dataset_file_types:
@@ -83,9 +85,10 @@ class DatasetPipeline(ABC):
         for source_dataset in self._source_datasets:
             dataset_name, dataset_mode, dataset_file_type = source_dataset
             dataset_root_dir_name = get_dataset_root_dir_name(dataset_name, dataset_mode)
-            dataset_input_path = Path(self._input_path) / dataset_root_dir_name / self._input_path_prefix
-            dataset_output_path = (Path(self._output_path) / self.dataset_output_dir_name / dataset_root_dir_name /
-                                   self._output_path_prefix)
+            dataset_input_path = (Path(self._input_path) / dataset_root_dir_name /
+                                  (dataset_file_type if dataset_file_type else "") / self._input_path_prefix)
+            dataset_output_path = (Path(self._output_path) / self.dataset_output_dir_name / dataset_root_dir_name
+                                   / (dataset_file_type if dataset_file_type else "") / self._output_path_prefix)
             if self.output_dataset_exists(dataset_output_path):
                 continue
             logging.info(f"Running pipeline {self.__class__.__name__} for source dataset {source_dataset}...")
