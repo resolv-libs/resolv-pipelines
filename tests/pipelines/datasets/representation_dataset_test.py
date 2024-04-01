@@ -4,9 +4,9 @@ from typing import Dict, Any
 
 from resolv_mir import NoteSequence
 
-from resolv_pipelines.data.representation.mir.note_sequence import PitchSequenceRepresentation
-from resolv_pipelines.pipelines.dofn.mir.symbolic_music.augmenters import NS_AUG_DO_FN_MAP
-from resolv_pipelines.pipelines.datasets.representation_dataset import RepresentationDatasetPipeline
+import resolv_pipelines.pipelines as resolv_pipelines
+from resolv_pipelines.data.representation.mir import PitchSequenceRepresentation
+from resolv_pipelines.pipelines.datasets import RepresentationDatasetPipeline
 
 
 class RepresentationDatasetPipelineTest(unittest.TestCase):
@@ -39,7 +39,7 @@ class RepresentationDatasetPipelineTest(unittest.TestCase):
             representation=PitchSequenceRepresentation(sequence_length=64, keep_attributes=True),
             canonical_format=NoteSequence,
             augmenters_config=self.augmenters_config,
-            allowed_augmenters_map=NS_AUG_DO_FN_MAP,
+            allowed_augmenters_map=resolv_pipelines.SUPPORTED_NOTE_SEQ_AUGMENTERS,
             source_dataset_names=["jsb-chorales-v1"],
             source_dataset_modes=["full"],
             source_dataset_file_types=["mxml"],

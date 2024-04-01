@@ -3,7 +3,7 @@ from pathlib import Path
 
 from resolv_mir import NoteSequence
 
-from resolv_pipelines.pipelines.dofn.mir.symbolic_music.attributes import ATTRIBUTE_DO_FN_MAP
+import resolv_pipelines.pipelines as resolv_pipelines
 from resolv_pipelines.pipelines.datasets.utilities import DrawHistogramPipeline
 
 
@@ -16,7 +16,7 @@ class DrawHistogramsPipelineTest(unittest.TestCase):
     def test_draw_histograms_pipeline(self):
         DrawHistogramPipeline(
             canonical_format=NoteSequence,
-            allowed_attributes_map=ATTRIBUTE_DO_FN_MAP,
+            allowed_attributes_map=resolv_pipelines.SUPPORTED_NOTE_SEQ_ATTRIBUTES,
             attributes=["toussaint"],
             bins=[30, 40, 50],
             source_dataset_names=["jsb-chorales-v1"],

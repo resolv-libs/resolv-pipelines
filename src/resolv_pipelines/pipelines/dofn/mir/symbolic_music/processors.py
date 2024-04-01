@@ -613,7 +613,7 @@ def DistinctNoteSequences(pcollection, debug_config: DoFnDebugConfig):
 
 
 # Dictionary mapping processor names to their respective classes
-NS_DO_FN_MAP = {
+NS_PROC_DO_FN_MAP = {
     'melody_extractor': ExtractMelodyDoFn,
     'quantizer': QuantizeDoFn,
     'splitter': SplitDoFn,

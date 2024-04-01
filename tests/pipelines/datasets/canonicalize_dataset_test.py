@@ -1,7 +1,7 @@
 import unittest
 from pathlib import Path
 
-from resolv_pipelines.pipelines.datasets.canonicalize_dataset import CanonicalizeDatasetPipeline
+from resolv_pipelines.pipelines.datasets import CanonicalizeDatasetPipeline
 
 
 class CanonicalizeDatasetPipelineTest(unittest.TestCase):

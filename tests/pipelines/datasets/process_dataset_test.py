@@ -4,9 +4,8 @@ from typing import Dict, Any
 
 from resolv_mir import note_sequence, NoteSequence
 
-from resolv_pipelines.pipelines.dofn.mir.symbolic_music.attributes import ATTRIBUTE_DO_FN_MAP
-from resolv_pipelines.pipelines.dofn.mir.symbolic_music.processors import NS_DO_FN_MAP
-from resolv_pipelines.pipelines.datasets.process_dataset import ProcessDatasetPipeline
+import resolv_pipelines.pipelines as resolv_pipelines
+from resolv_pipelines.pipelines.datasets import ProcessDatasetPipeline
 
 
 class ProcessDatasetPipelineTest(unittest.TestCase):
@@ -68,7 +67,7 @@ class ProcessDatasetPipelineTest(unittest.TestCase):
     def test_generate_dataset_pipeline(self):
         ProcessDatasetPipeline(
             canonical_format=NoteSequence,
-            allowed_processors_map=NS_DO_FN_MAP,
+            allowed_processors_map=resolv_pipelines.SUPPORTED_NOTE_SEQ_PROCESSORS,
             processors_config=self.processors_config,
             source_dataset_names=["jsb-chorales-v1"],
             source_dataset_modes=["full"],
@@ -84,7 +83,7 @@ class ProcessDatasetPipelineTest(unittest.TestCase):
     def test_compute_attributes_pipeline(self):
         ProcessDatasetPipeline(
             canonical_format=NoteSequence,
-            allowed_processors_map=ATTRIBUTE_DO_FN_MAP,
+            allowed_processors_map=resolv_pipelines.SUPPORTED_NOTE_SEQ_ATTRIBUTES,
             processors_config=self.attributes_config,
             source_dataset_names=["jsb-chorales-v1"],
             source_dataset_modes=["full"],

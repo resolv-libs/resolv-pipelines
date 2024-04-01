@@ -1,7 +1,7 @@
 import unittest
 from pathlib import Path
 
-from resolv_pipelines.pipelines.datasets.import_dataset import ImportArchiveDatasetPipeline
+from resolv_pipelines.pipelines.datasets import ImportArchiveDatasetPipeline
 
 
 class ImportArchivePipelineTest(unittest.TestCase):

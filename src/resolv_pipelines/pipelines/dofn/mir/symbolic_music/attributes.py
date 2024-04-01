@@ -464,7 +464,7 @@ class LongestRepetitiveSectionDoFn(AttributeDoFn):
 
 
 # Dictionary mapping attribute names to their respective computation classes
-ATTRIBUTE_DO_FN_MAP = {
+NS_ATTRIBUTE_DO_FN_MAP = {
     'toussaint': ToussaintAttributeDoFn,
     'note_density': NoteDensityAttributeDoFn,
     'pitch_range': PitchRangeAttributeDoFn,
