@@ -13,7 +13,7 @@ class Representation(ABC):
         pass
 
     @abstractmethod
-    def parse_example(self, serialized_example: Union[str, bytes], **kwargs) -> Any:
+    def parse_example(self, serialized_example, **kwargs) -> Any:
         pass
 
 
@@ -42,9 +42,11 @@ class SequenceRepresentation(Representation):
     def sequence_features(self, *args, **kwargs) -> Dict[str, tf.train.Feature]:
         pass
 
-    def context_features(self, attributes_to_parse: List[str]) -> Dict[str, tf.train.Feature]:
+    def context_features(self, attributes_to_parse: List[str], default_value: int = None) \
+            -> Dict[str, tf.train.Feature]:
+        print("Default value", default_value)
         return {
-            attribute: tf.io.FixedLenFeature([], dtype=tf.float32)
+            attribute: tf.io.FixedLenFeature([], dtype=tf.float32, default_value=default_value)
             for attribute in self.attribute_fields if attribute in attributes_to_parse
         }
 
@@ -55,12 +57,14 @@ class SequenceRepresentation(Representation):
             sequence_example.context.CopyFrom(context)
         return sequence_example
 
-    def parse_example(self, serialized_example: Union[str, bytes], **kwargs) -> Any:
-        parse_sequence_feature = kwargs['parse_sequence_feature']
+    def parse_example(self, serialized_example, **kwargs) -> Any:
         return tf.io.parse_single_sequence_example(
             serialized_example,
-            context_features=self.context_features(kwargs['attributes_to_parse']),
-            sequence_features=self.sequence_features(**kwargs) if parse_sequence_feature else {}
+            context_features=self.context_features(
+                attributes_to_parse=kwargs.get('attributes_to_parse'),
+                default_value=kwargs.get('default_attributes_value')
+            ),
+            sequence_features=self.sequence_features(**kwargs) if kwargs.get('parse_sequence_feature') else {}
         )
 
     def _get_attributes_features(self, canonical_format: CanonicalFormat) -> Dict[str, tf.train.Feature]:
@@ -68,7 +72,5 @@ class SequenceRepresentation(Representation):
         sequence_attributes = getattr(canonical_format, self.attributes_field_name)
         for attribute_field in self.attribute_fields:
             field_value = getattr(sequence_attributes, attribute_field)
-            if not field_value:
-                field_value = tf.keras.backend.epsilon()
             field_values[attribute_field] = tf.train.Feature(float_list=tf.train.FloatList(value=[field_value]))
         return field_values

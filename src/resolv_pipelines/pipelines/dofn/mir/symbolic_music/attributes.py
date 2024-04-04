@@ -31,7 +31,7 @@ Example:
 
         @staticmethod
         def name() -> str:
-            return "Customattribute"
+            return "CustomAttribute"
 
         @staticmethod
         def default_config() -> Dict[str, Any]:
