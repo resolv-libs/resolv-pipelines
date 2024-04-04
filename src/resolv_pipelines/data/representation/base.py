@@ -44,7 +44,6 @@ class SequenceRepresentation(Representation):
 
     def context_features(self, attributes_to_parse: List[str], default_value: int = None) \
             -> Dict[str, tf.train.Feature]:
-        print("Default value", default_value)
         return {
             attribute: tf.io.FixedLenFeature([], dtype=tf.float32, default_value=default_value)
             for attribute in self.attribute_fields if attribute in attributes_to_parse
