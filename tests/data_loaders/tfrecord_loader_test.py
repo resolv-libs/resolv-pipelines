@@ -37,7 +37,7 @@ class TFRecordLoaderTest(unittest.TestCase):
             file_pattern=f"{self.input_dir}/*.tfrecord",
             parse_fn=functools.partial(
                 representation.parse_example,
-                attributes_to_parse=["cid"],
+                attributes_to_parse=["contour"],
                 parse_sequence_feature=False
             ),
             deterministic=True,
