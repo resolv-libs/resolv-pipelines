@@ -44,10 +44,13 @@ class SequenceRepresentation(Representation):
 
     def context_features(self, attributes_to_parse: List[str], default_value: int = None) \
             -> Dict[str, tf.train.Feature]:
-        return {
-            attribute: tf.io.FixedLenFeature([], dtype=tf.float32, default_value=default_value)
-            for attribute in self.attribute_fields if attribute in attributes_to_parse
-        }
+        if not attributes_to_parse:
+            return {}
+        else:
+            return {
+                attribute: tf.io.FixedLenFeature([], dtype=tf.float32, default_value=default_value)
+                for attribute in self.attribute_fields if attribute in attributes_to_parse
+            }
 
     def to_example(self, canonical_format: CanonicalFormat, **kwargs) -> tf.train.Example:
         sequence_example = self.to_sequence_example(canonical_format)
