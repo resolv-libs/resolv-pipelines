@@ -5,6 +5,7 @@ from typing import Dict, List, Union, Tuple, Any
 
 import apache_beam as beam
 import apache_beam.metrics as beam_metrics
+import tensorflow as tf
 
 from .base import DatasetPipeline
 from ...canonical import CanonicalFormat
@@ -28,6 +29,7 @@ class RepresentationDatasetPipeline(DatasetPipeline):
                  output_dataset_name: str = "",
                  input_path_prefix: str = "",
                  output_path_prefix: str = "data",
+                 split_ratios: Dict[str, float] = None,
                  force_overwrite: bool = False,
                  logging_level: str = 'INFO',
                  debug: bool = False,
@@ -47,13 +49,19 @@ class RepresentationDatasetPipeline(DatasetPipeline):
             logging_level=logging_level,
             pipeline_options=pipeline_options
         )
+        if split_ratios and (len(split_ratios) < 2 or sum(split_ratios.values()) != 100):
+            raise ValueError("Split ratios must sum to 100.")
         self._canonical_format = canonical_format
         self._representation = representation
         self._allowed_augmenters_map = allowed_augmenters_map
         self._augmenters_config = augmenters_config
+        self._split_ratios = split_ratios
         self._debug = debug
         self._debug_output_type = debug_output_type
         self._debug_file_pattern = debug_file_pattern
+        # Set tensorflow to run deterministically for example serialization
+        tf.keras.utils.set_random_seed(42)
+        tf.config.experimental.enable_op_determinism()
 
     @property
     def dataset_output_dir_name(self) -> str:
@@ -97,13 +105,26 @@ class RepresentationDatasetPipeline(DatasetPipeline):
         output_sequences = (output_sequences
                             | 'CountTotalElements' >> beam.ParDo(CountElementsDoFn(name='total_sequences')))
 
-        # Write note sequences
-        output_tfrecord_prefix = str(dataset_output_path / self._output_path_prefix)
-        _ = (output_sequences
-             | 'WriteToTFRecord' >> beam.io.WriteToTFRecord(file_path_prefix=output_tfrecord_prefix,
-                                                            file_name_suffix=".tfrecord",
-                                                            coder=beam.coders.ProtoCoder(self._canonical_format))
-             )
+        # Apply split ratios
+        datasets = [output_sequences]
+        if self._split_ratios:
+            datasets = output_sequences | beam.Partition(self._partition_fn,
+                                                         len(self._split_ratios.keys()),
+                                                         ratios=[x // 10 for x in list(self._split_ratios.values())])
+
+        # Write datasets
+        for idx, dataset in enumerate(datasets):
+            dataset_name = list(self._split_ratios.keys())[idx]
+            dataset_name_cap = dataset_name.capitalize()
+            dataset_prefix = f'{dataset_name}_' if self._split_ratios else ""
+            output_tfrecord_prefix = str(dataset_output_path / (dataset_prefix + self._output_path_prefix))
+            _ = (dataset
+                 | f'Count{dataset_name_cap}Elements' >> beam.ParDo(CountElementsDoFn(name=f'{dataset_name}_sequences'))
+                 | f'Write{dataset_name_cap}ToTFRecord' >> beam.io.WriteToTFRecord(
+                        file_path_prefix=output_tfrecord_prefix,
+                        file_name_suffix=".tfrecord",
+                        coder=beam.coders.ProtoCoder(self._canonical_format))
+                 )
 
     def _log_source_dataset_pipeline_metrics(self,
                                              results,
@@ -128,3 +149,21 @@ class RepresentationDatasetPipeline(DatasetPipeline):
             beam_metrics.MetricsFilter().with_namespace('stats').with_name('total_sequences')
         )['counters'][0].result
         logging.info(f'\tTotal extracted sequences: {total_sequences}')
+        for dataset_name, ratio in self._split_ratios.items():
+            expected_dataset_sequences = total_sequences * ratio / 100
+            extracted_dataset_sequence = results.metrics().query(
+                beam_metrics.MetricsFilter().with_namespace('stats').with_name(f'{dataset_name}_sequences')
+            )['counters'][0].result
+            logging.info(f'\t{dataset_name.capitalize()} extracted sequences: {extracted_dataset_sequence} '
+                         f'(expected {expected_dataset_sequences})')
+
+    @staticmethod
+    def _partition_fn(element, num_partitions, ratios):
+        assert num_partitions == len(ratios)
+        bucket = sum(tf.train.Example.SerializeToString(element, deterministic=True)) % sum(ratios)
+        total = 0
+        for i, part in enumerate(ratios):
+            total += part
+            if bucket < total:
+                return i
+        return len(ratios) - 1

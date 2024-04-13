@@ -1,14 +1,15 @@
-from abc import abstractmethod
-from typing import List, Dict
+from abc import ABC
+from typing import List, Dict, Iterable, Any
 
 import tensorflow as tf
 from resolv_mir import NoteSequence
 from resolv_mir.note_sequence import representations
 
+from resolv_pipelines.canonical import CanonicalFormat
 from ..base import SequenceRepresentation
 
 
-class NoteSequenceRepresentation(SequenceRepresentation):
+class NoteSequenceRepresentation(SequenceRepresentation, ABC):
 
     def __init__(self, sequence_length: int, keep_attributes: bool = False):
         super(NoteSequenceRepresentation, self).__init__(sequence_length, keep_attributes)
@@ -20,14 +21,6 @@ class NoteSequenceRepresentation(SequenceRepresentation):
     @property
     def attribute_fields(self) -> List[str]:
         return [f.name for f in NoteSequence.SequenceAttributes.DESCRIPTOR.fields]
-
-    @abstractmethod
-    def to_sequence_example(self, note_sequence: NoteSequence) -> tf.train.SequenceExample:
-        pass
-
-    @abstractmethod
-    def sequence_features(self, *args, **kwargs) -> Dict[str, tf.train.Feature]:
-        pass
 
 
 class PitchSequenceRepresentation(NoteSequenceRepresentation):
@@ -44,6 +37,9 @@ class PitchSequenceRepresentation(NoteSequenceRepresentation):
         })
         sequence_example = tf.train.SequenceExample(feature_lists=feature_lists)
         return sequence_example
+
+    def to_canonical_format(self, pitch_sequence: Iterable[int], attributes: Dict[str, Any]) -> CanonicalFormat:
+        return representations.from_pitch_sequence(pitch_sequence, attributes)
 
     def sequence_features(self, *args, **kwargs) -> Dict[str, tf.train.Feature]:
         return {

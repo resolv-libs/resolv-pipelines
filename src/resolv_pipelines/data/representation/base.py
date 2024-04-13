@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Union, Any, List, Dict
+from typing import Any, List, Dict
 
 import tensorflow as tf
 
@@ -14,6 +14,10 @@ class Representation(ABC):
 
     @abstractmethod
     def parse_example(self, serialized_example, **kwargs) -> Any:
+        pass
+
+    @abstractmethod
+    def to_canonical_format(self, **kwargs) -> CanonicalFormat:
         pass
 
 

@@ -47,6 +47,7 @@ class RepresentationDatasetPipelineTest(unittest.TestCase):
             input_path_prefix="attributes",
             output_path=self.output_dir,
             output_path_prefix="pitchseq",
+            split_ratios={"train": 70, "validation": 20, "test": 10},
             output_dataset_name="4bars_melodies_distinct",
             force_overwrite=True,
             debug=False
