@@ -117,7 +117,8 @@ class RepresentationDatasetPipeline(DatasetPipeline):
             dataset_name = list(self._split_ratios.keys())[idx]
             dataset_name_cap = dataset_name.capitalize()
             dataset_prefix = f'{dataset_name}_' if self._split_ratios else ""
-            output_tfrecord_prefix = str(dataset_output_path / (dataset_prefix + self._output_path_prefix))
+            output_tfrecord_prefix = str(dataset_output_path / dataset_name /
+                                         (dataset_prefix + self._output_path_prefix))
             _ = (dataset
                  | f'Count{dataset_name_cap}Elements' >> beam.ParDo(CountElementsDoFn(name=f'{dataset_name}_sequences'))
                  | f'Write{dataset_name_cap}ToTFRecord' >> beam.io.WriteToTFRecord(
