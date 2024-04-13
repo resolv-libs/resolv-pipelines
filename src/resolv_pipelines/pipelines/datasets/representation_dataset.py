@@ -6,7 +6,6 @@ from typing import Dict, List, Union, Tuple, Any
 
 import apache_beam as beam
 import apache_beam.metrics as beam_metrics
-import tensorflow as tf
 
 from .base import DatasetPipeline
 from ...canonical import CanonicalFormat
