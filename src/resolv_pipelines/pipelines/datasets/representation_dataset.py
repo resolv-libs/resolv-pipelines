@@ -60,7 +60,7 @@ class RepresentationDatasetPipeline(DatasetPipeline):
         self._debug_output_type = debug_output_type
         self._debug_file_pattern = debug_file_pattern
         # Set tensorflow to run deterministically for example serialization
-        tf.keras.utils.set_random_seed(42)
+        tf.random.set_seed(42)
         tf.config.experimental.enable_op_determinism()
 
     @property
