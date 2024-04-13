@@ -1,5 +1,6 @@
 """ TODO - pipeline doc """
 import logging
+import random
 from pathlib import Path
 from typing import Dict, List, Union, Tuple, Any
 
@@ -49,8 +50,8 @@ class RepresentationDatasetPipeline(DatasetPipeline):
             logging_level=logging_level,
             pipeline_options=pipeline_options
         )
-        if split_ratios and (len(split_ratios) < 2 or sum(split_ratios.values()) != 100):
-            raise ValueError("Split ratios must sum to 100.")
+        if split_ratios and (len(split_ratios) < 2 or round(sum(split_ratios.values())) != 1):
+            raise ValueError("Split ratios must sum to 1.")
         self._canonical_format = canonical_format
         self._representation = representation
         self._allowed_augmenters_map = allowed_augmenters_map
@@ -59,9 +60,8 @@ class RepresentationDatasetPipeline(DatasetPipeline):
         self._debug = debug
         self._debug_output_type = debug_output_type
         self._debug_file_pattern = debug_file_pattern
-        # Set tensorflow to run deterministically for example serialization
-        tf.random.set_seed(42)
-        tf.config.experimental.enable_op_determinism()
+        # Set seed to run partitioning deterministically
+        random.seed(42)
 
     @property
     def dataset_output_dir_name(self) -> str:
@@ -110,7 +110,7 @@ class RepresentationDatasetPipeline(DatasetPipeline):
         if self._split_ratios:
             datasets = output_sequences | beam.Partition(self._partition_fn,
                                                          len(self._split_ratios.keys()),
-                                                         ratios=[x // 10 for x in list(self._split_ratios.values())])
+                                                         ratios=list(self._split_ratios.values()))
 
         # Write datasets
         for idx, dataset in enumerate(datasets):
@@ -151,7 +151,7 @@ class RepresentationDatasetPipeline(DatasetPipeline):
         )['counters'][0].result
         logging.info(f'\tTotal extracted sequences: {total_sequences}')
         for dataset_name, ratio in self._split_ratios.items():
-            expected_dataset_sequences = total_sequences * ratio / 100
+            expected_dataset_sequences = int(total_sequences * ratio)
             extracted_dataset_sequence = results.metrics().query(
                 beam_metrics.MetricsFilter().with_namespace('stats').with_name(f'{dataset_name}_sequences')
             )['counters'][0].result
@@ -159,12 +159,6 @@ class RepresentationDatasetPipeline(DatasetPipeline):
                          f'(expected {expected_dataset_sequences})')
 
     @staticmethod
-    def _partition_fn(element, num_partitions, ratios):
+    def _partition_fn(_, num_partitions, ratios):
         assert num_partitions == len(ratios)
-        bucket = sum(tf.train.Example.SerializeToString(element, deterministic=True)) % sum(ratios)
-        total = 0
-        for i, part in enumerate(ratios):
-            total += part
-            if bucket < total:
-                return i
-        return len(ratios) - 1
+        return random.choices(range(num_partitions), ratios)[0]
