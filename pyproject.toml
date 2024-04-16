@@ -30,7 +30,7 @@ classifiers = [
     "Operating System :: OS Independent"
 ]
 packages = [
-    { include = "resolv_pipelines", from = "src" },
+    { include = "resolv_pipelines", from = "src" }
 ]
 include = ["CHANGELOG.md"]
 
@@ -38,9 +38,9 @@ include = ["CHANGELOG.md"]
 python = ">=3.9,<3.12"
 apache-beam = "^2.55.0"
 matplotlib = "^3.8.2"
-tensorflow = "^2.16.1"
 resolv-data = {git = "ssh://git@github.com/resolv-libs/resolv-data.git", rev = "main"}
 resolv-mir = {git = "ssh://git@github.com/resolv-libs/resolv-mir.git", rev = "main"}
+tensorflow = { version = "^2.16.1", optional = true }
 python-snappy = { version = "0.6.1", optional = true }
 
 [tool.poetry.group.dev.dependencies]
@@ -51,6 +51,7 @@ python-snappy = { version = "0.6.1", optional = true }
 
 [tool.poetry.extras]
 snappy = ["python-snappy"]
+tensorflow = ["tensorflow"]
 
 [tool.poetry.plugins]
 
