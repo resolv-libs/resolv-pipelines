@@ -103,7 +103,11 @@ class ConfigurableDoFn(ABC, beam.DoFn):
         _init_statistics() -> Dict[str, Any]: Internal abstract method to initialize statistics for the DoFn.
     """
 
-    def __init__(self, config: Dict[str, Any] = None, debug_config: DoFnDebugConfig = None):
+    def __init__(self,
+                 config: Dict[str, Any] = None,
+                 debug_config: DoFnDebugConfig = None,
+                 name: str = "",
+                 namespace: str = ""):
         """
         Constructor for ConfigurableDoFn.
 
@@ -111,6 +115,8 @@ class ConfigurableDoFn(ABC, beam.DoFn):
             config (Dict[str, Any], optional): Configuration for the DoFn that will be merged to default_config.
                 Defaults to None.
             debug_config (DoFnDebugConfig, optional): Debug configuration for the DoFn. Defaults to None.
+            name (str, optional): Name of the DoFn. Defaults to "".
+            namespace (str, optional): Name of the namespace. Defaults to "".
         """
         super(ConfigurableDoFn, self).__init__()
         self._config = self.default_config()
@@ -120,6 +126,8 @@ class ConfigurableDoFn(ABC, beam.DoFn):
         self._statistics = None
         self._worker_id = None
         self._processed_elements = None
+        self._name = name if name else self.default_name()
+        self._namespace = namespace if namespace else self.default_namespace()
 
     def setup(self):
         """
@@ -140,25 +148,43 @@ class ConfigurableDoFn(ABC, beam.DoFn):
         """
         return self._statistics
 
-    @staticmethod
-    @abstractmethod
-    def name() -> str:
+    def name(self) -> str:
         """
         Abstract method to get the name of the DoFn.
 
         Returns:
             str: Name of the DoFn.
         """
-        pass
+        return self._name
 
-    @staticmethod
-    @abstractmethod
-    def namespace() -> str:
+    def namespace(self) -> str:
         """
         Abstract method to get the namespace of the DoFn.
 
         Returns:
             str: Namespace of the DoFn.
+        """
+        return self._namespace
+
+    @staticmethod
+    @abstractmethod
+    def default_name() -> str:
+        """
+        Abstract method to get the default name of the DoFn.
+
+        Returns:
+            str: Default name of the DoFn.
+        """
+        pass
+
+    @staticmethod
+    @abstractmethod
+    def default_namespace() -> str:
+        """
+        Abstract method to get the default namespace of the DoFn.
+
+        Returns:
+            str: Default namespace of the DoFn.
         """
         pass
 

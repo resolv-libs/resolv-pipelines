@@ -29,7 +29,7 @@ class RepresentationDatasetPipeline(DatasetPipeline):
                  output_dataset_name: str = "",
                  input_path_prefix: str = "",
                  output_path_prefix: str = "data",
-                 split_ratios: Dict[str, float] = None,
+                 split_config: Dict = None,
                  force_overwrite: bool = False,
                  logging_level: str = 'INFO',
                  debug: bool = False,
@@ -49,13 +49,23 @@ class RepresentationDatasetPipeline(DatasetPipeline):
             logging_level=logging_level,
             pipeline_options=pipeline_options
         )
-        if split_ratios and (len(split_ratios) < 2 or round(sum(split_ratios.values())) != 1):
-            raise ValueError("Split ratios must sum to 1.")
+        if split_config:
+            split_ratios = [v["ratio"] for v in split_config.values()]
+            split_augmentation = [v.get("augment", False) for v in split_config.values()]
+            if split_ratios and (len(split_ratios) < 2 or round(sum(split_ratios)) != 1):
+                raise ValueError("Split ratios must sum to 1.")
+            self._split_names = list(split_config.keys())
+            self._split_ratios = split_ratios
+            self._split_augmentation = split_augmentation
+        else:
+            self._split_names = [""]
+            self._split_ratios = None
+            self._split_augmentation = [bool(augmenters_config)]
         self._canonical_format = canonical_format
         self._representation = representation
         self._allowed_augmenters_map = allowed_augmenters_map
         self._augmenters_config = augmenters_config
-        self._split_ratios = split_ratios
+        self._datasets_augmenters_do_fns = []
         self._debug = debug
         self._debug_output_type = debug_output_type
         self._debug_file_pattern = debug_file_pattern
@@ -68,7 +78,7 @@ class RepresentationDatasetPipeline(DatasetPipeline):
 
     @property
     def augmenters_do_fn_map(self) -> Dict[ConfigurableDoFn.__class__, Dict[str, Any]]:
-        do_fn_configs_map = {self._allowed_augmenters_map[id]: config for id, config in self._augmenters_config.items()}
+        do_fn_configs_map = {self._allowed_augmenters_map[x]: config for x, config in self._augmenters_config.items()}
         filtered_do_fn_map = {key: value for key, value in do_fn_configs_map.items() if value['order'] >= 0}
         sorted_do_fn_map = {key: value for key, value in
                             sorted(filtered_do_fn_map.items(), key=lambda item: item[1]['order'])}
@@ -82,44 +92,52 @@ class RepresentationDatasetPipeline(DatasetPipeline):
         # Read note sequences
         input_ns = pipeline | 'ReadTFRecord' >> beam.io.ReadFromTFRecord(
             file_pattern=str(dataset_input_path / "*.tfrecord"),
-            coder=beam.coders.ProtoCoder(self._canonical_format))
-
-        # Apply augmenters
-        debug_do_fn_config = DoFnDebugConfig(enabled=self._debug,
-                                             output_path=dataset_output_path,
-                                             output_type=self._debug_output_type,
-                                             output_file_pattern=self._debug_file_pattern)
-        augmented_input_ns = input_ns
-        for do_fn, do_fn_config in self.augmenters_do_fn_map.items():
-            augmented_input_ns = (
-                    augmented_input_ns
-                    | f'{do_fn.__name__}' >> beam.ParDo(do_fn(config=do_fn_config,
-                                                              debug_config=debug_do_fn_config))
-            )
-
-        # Apply representation
-        output_sequences = augmented_input_ns | beam.Map(self._representation.to_example)
-
-        # Count output sequences
-        output_sequences = (output_sequences
-                            | 'CountTotalElements' >> beam.ParDo(CountElementsDoFn(name='total_sequences')))
+            coder=beam.coders.ProtoCoder(self._canonical_format)
+        )
 
         # Apply split ratios
-        datasets = [output_sequences]
+        datasets = [input_ns]
         if self._split_ratios:
-            datasets = output_sequences | beam.Partition(self._partition_fn,
-                                                         len(self._split_ratios.keys()),
-                                                         ratios=list(self._split_ratios.values()))
+            datasets = (input_ns
+                        | 'CountTotalElements' >> beam.ParDo(CountElementsDoFn(name='total_sequences'))
+                        | 'SplitDataset' >> beam.Partition(self._partition_fn, len(self._split_ratios),
+                                                           ratios=self._split_ratios))
 
-        # Write datasets
         for idx, dataset in enumerate(datasets):
-            dataset_name = list(self._split_ratios.keys())[idx]
+            dataset_name = self._split_names[idx]
             dataset_name_cap = dataset_name.capitalize()
+
+            # Apply augmenters
+            augmented_dataset = dataset
+            if self._split_augmentation[idx]:
+                debug_do_fn_config = DoFnDebugConfig(enabled=self._debug,
+                                                     output_path=dataset_output_path,
+                                                     output_type=self._debug_output_type,
+                                                     output_file_pattern=self._debug_file_pattern)
+                dataset_augmenters_do_fns = []
+                for do_fn_class, do_fn_config in self.augmenters_do_fn_map.items():
+                    do_fn_name = f'{dataset_name_cap}{do_fn_class.default_name()}' if self._split_ratios else ""
+                    do_fn_namespace = f'{dataset_name}_{do_fn_class.default_namespace()}' if self._split_ratios else ""
+                    do_fn = do_fn_class(config=do_fn_config,
+                                        debug_config=debug_do_fn_config,
+                                        name=do_fn_name,
+                                        namespace=do_fn_namespace)
+                    dataset_augmenters_do_fns.append(do_fn)
+                    augmented_dataset = augmented_dataset | f'{do_fn_name}' >> beam.ParDo(do_fn)
+                self._datasets_augmenters_do_fns.append(dataset_augmenters_do_fns)
+
+            # Apply representation
+            output_dataset = (augmented_dataset
+                              | f"{dataset_name_cap}ToExample" >> beam.Map(self._representation.to_example))
+
+            # Write datasets
             dataset_prefix = f'{dataset_name}_' if self._split_ratios else ""
             output_tfrecord_prefix = str(dataset_output_path / dataset_name /
                                          (dataset_prefix + self._output_path_prefix))
-            _ = (dataset
-                 | f'Count{dataset_name_cap}Elements' >> beam.ParDo(CountElementsDoFn(name=f'{dataset_name}_sequences'))
+            _ = (output_dataset
+                 | f'Count{dataset_name_cap}Elements' >> beam.ParDo(
+                        CountElementsDoFn(name=f'{dataset_name if self._split_ratios else "total"}_sequences')
+                    )
                  | f'Write{dataset_name_cap}ToTFRecord' >> beam.io.WriteToTFRecord(
                         file_path_prefix=output_tfrecord_prefix,
                         file_name_suffix=".tfrecord",
@@ -131,31 +149,36 @@ class RepresentationDatasetPipeline(DatasetPipeline):
                                              source_dataset: Tuple[str, str, str],
                                              dataset_input_path: Path,
                                              dataset_output_path: Path):
-        # Log metrics for all augmenters
         logging.info(f'------------- METRICS for {dataset_input_path} -------------')
-        for do_fn, _ in self.augmenters_do_fn_map.items():
-            augmenter_metrics = results.metrics().query(
-                beam_metrics.MetricsFilter().with_namespace(do_fn.namespace())
-            )
-            logging.info(f'\t------------- {do_fn.name()} -------------')
-            for metric_type, metrics in augmenter_metrics.items():
-                if metrics:
-                    logging.info(f'\t\t------------- {metric_type} -------------'.capitalize())
-                    for metric_result in metrics:
-                        logging.info(f'\t\t{metric_result.key.metric.name}: {metric_result.result}')
-
-        # Log global metrics
         total_sequences = results.metrics().query(
             beam_metrics.MetricsFilter().with_namespace('stats').with_name('total_sequences')
         )['counters'][0].result
-        logging.info(f'\tTotal extracted sequences: {total_sequences}')
-        for dataset_name, ratio in self._split_ratios.items():
-            expected_dataset_sequences = int(total_sequences * ratio)
-            extracted_dataset_sequence = results.metrics().query(
-                beam_metrics.MetricsFilter().with_namespace('stats').with_name(f'{dataset_name}_sequences')
-            )['counters'][0].result
-            logging.info(f'\t{dataset_name.capitalize()} extracted sequences: {extracted_dataset_sequence} '
-                         f'(expected {expected_dataset_sequences})')
+        logging.info(f'\tTotal sequences: {total_sequences}')
+
+        for idx, split_name in enumerate(self._split_names):
+            if self._split_ratios:
+                logging.info(f'------------- {split_name.upper()} DATASET -------------')
+
+            if self._split_augmentation[idx]:
+                for do_fn in self._datasets_augmenters_do_fns[idx]:
+                    augmenter_metrics = results.metrics().query(
+                        beam_metrics.MetricsFilter().with_namespace(do_fn.namespace())
+                    )
+                    logging.info(f'\t------------- {do_fn.name()} -------------')
+                    for metric_type, metrics in augmenter_metrics.items():
+                        if metrics:
+                            logging.info(f'\t\t------------- {metric_type} -------------'.capitalize())
+                            for metric_result in metrics:
+                                logging.info(f'\t\t{metric_result.key.metric.name}: {metric_result.result}')
+
+            if self._split_ratios:
+                dataset_name = self._split_names[idx]
+                expected_dataset_sequences = int(total_sequences * self._split_ratios[idx])
+                extracted_dataset_sequence = results.metrics().query(
+                    beam_metrics.MetricsFilter().with_namespace('stats').with_name(f'{dataset_name}_sequences')
+                )['counters'][0].result
+                logging.info(f'\t{dataset_name.capitalize()} extracted sequences: {extracted_dataset_sequence} '
+                             f'(expected {expected_dataset_sequences})')
 
     @staticmethod
     def _partition_fn(_, num_partitions, ratios):

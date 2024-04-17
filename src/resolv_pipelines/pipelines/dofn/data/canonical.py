@@ -90,11 +90,11 @@ class ToCanonicalFormatDoFn(ConfigurableDoFn):
         super(ToCanonicalFormatDoFn, self).__init__(config, debug_config)
 
     @staticmethod
-    def name() -> str:
+    def default_name() -> str:
         return "Canonicalizer"
 
     @staticmethod
-    def namespace() -> str:
+    def default_namespace() -> str:
         return "stats"
 
     def default_config(self) -> Dict[str, Any]:

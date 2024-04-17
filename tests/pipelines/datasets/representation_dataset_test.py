@@ -47,10 +47,26 @@ class RepresentationDatasetPipelineTest(unittest.TestCase):
             input_path_prefix="attributes",
             output_path=self.output_dir,
             output_path_prefix="pitchseq",
-            split_ratios={"train": 0.7, "validation": 0.2, "test": 0.1},
+            split_config={
+                "train": {
+                    "ratio": 0.7,
+                    "augment":  True
+                },
+                "validation": {
+                    "ratio": 0.2,
+                    "augment": True
+                },
+                "test": {
+                    "ratio": 0.1
+                }
+            },
             output_dataset_name="4bars_melodies_distinct",
             force_overwrite=True,
-            debug=False
+            debug=False,
+            pipeline_options={
+                "runner": "DirectRunner",
+                "direct_running_mode": "in_memory"
+            }
         ).run_pipeline()
 
 

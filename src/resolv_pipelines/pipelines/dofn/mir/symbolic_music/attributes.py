@@ -82,8 +82,12 @@ class AttributeDoFn(ConfigurableDoFn, ABC):
         _write_debug(note_sequence: NoteSequence): Write debug information for the attribute computation.
     """
 
-    def __init__(self, config: Dict[str, Any] = None, debug_config: DoFnDebugConfig = None):
-        super(AttributeDoFn, self).__init__(config, debug_config)
+    def __init__(self,
+                 config: Dict[str, Any] = None,
+                 debug_config: DoFnDebugConfig = None,
+                 name: str = "",
+                 namespace: str = ""):
+        super(AttributeDoFn, self).__init__(config, debug_config, name, namespace)
 
     @staticmethod
     @abstractmethod
@@ -110,7 +114,7 @@ class AttributeDoFn(ConfigurableDoFn, ABC):
         pass
 
     @staticmethod
-    def namespace() -> str:
+    def default_namespace() -> str:
         return ""
 
     def process(self, element: NoteSequence, *args, **kwargs):
@@ -160,11 +164,15 @@ class AttributeDoFn(ConfigurableDoFn, ABC):
 class ToussaintAttributeDoFn(AttributeDoFn):
     """Computes Toussaint attribute from NoteSequence objects."""
 
-    def __init__(self, config: Dict[str, Any] = None, debug_config: DoFnDebugConfig = None):
-        super(ToussaintAttributeDoFn, self).__init__(config, debug_config)
+    def __init__(self,
+                 config: Dict[str, Any] = None,
+                 debug_config: DoFnDebugConfig = None,
+                 name: str = "",
+                 namespace: str = ""):
+        super(ToussaintAttributeDoFn, self).__init__(config, debug_config, name, namespace)
 
     @staticmethod
-    def name() -> str:
+    def default_name() -> str:
         return "Toussaint"
 
     @staticmethod
@@ -185,11 +193,15 @@ class ToussaintAttributeDoFn(AttributeDoFn):
 class NoteDensityAttributeDoFn(AttributeDoFn):
     """Computes note density attribute from NoteSequence objects."""
 
-    def __init__(self, config: Dict[str, Any] = None, debug_config: DoFnDebugConfig = None):
-        super(NoteDensityAttributeDoFn, self).__init__(config, debug_config)
+    def __init__(self,
+                 config: Dict[str, Any] = None,
+                 debug_config: DoFnDebugConfig = None,
+                 name: str = "",
+                 namespace: str = ""):
+        super(NoteDensityAttributeDoFn, self).__init__(config, debug_config, name, namespace)
 
     @staticmethod
-    def name() -> str:
+    def default_name() -> str:
         return "NoteDensity"
 
     @staticmethod
@@ -210,11 +222,15 @@ class NoteDensityAttributeDoFn(AttributeDoFn):
 class PitchRangeAttributeDoFn(AttributeDoFn):
     """Computes pitch range attribute from NoteSequence objects."""
 
-    def __init__(self, config: Dict[str, Any] = None, debug_config: DoFnDebugConfig = None):
-        super(PitchRangeAttributeDoFn, self).__init__(config, debug_config)
+    def __init__(self,
+                 config: Dict[str, Any] = None,
+                 debug_config: DoFnDebugConfig = None,
+                 name: str = "",
+                 namespace: str = ""):
+        super(PitchRangeAttributeDoFn, self).__init__(config, debug_config, name, namespace)
 
     @staticmethod
-    def name() -> str:
+    def default_name() -> str:
         return "PitchRange"
 
     @staticmethod
@@ -234,11 +250,15 @@ class PitchRangeAttributeDoFn(AttributeDoFn):
 class ContourAttributeDoFn(AttributeDoFn):
     """Computes contour attribute from NoteSequence objects."""
 
-    def __init__(self, config: Dict[str, Any] = None, debug_config: DoFnDebugConfig = None):
-        super(ContourAttributeDoFn, self).__init__(config, debug_config)
+    def __init__(self,
+                 config: Dict[str, Any] = None,
+                 debug_config: DoFnDebugConfig = None,
+                 name: str = "",
+                 namespace: str = ""):
+        super(ContourAttributeDoFn, self).__init__(config, debug_config, name, namespace)
 
     @staticmethod
-    def name() -> str:
+    def default_name() -> str:
         return "Contour"
 
     @staticmethod
@@ -258,11 +278,15 @@ class ContourAttributeDoFn(AttributeDoFn):
 class UniqueNotesAttributeDoFn(AttributeDoFn):
     """Computes ratio of unique notes attribute from NoteSequence objects."""
 
-    def __init__(self, config: Dict[str, Any] = None, debug_config: DoFnDebugConfig = None):
-        super(UniqueNotesAttributeDoFn, self).__init__(config, debug_config)
+    def __init__(self,
+                 config: Dict[str, Any] = None,
+                 debug_config: DoFnDebugConfig = None,
+                 name: str = "",
+                 namespace: str = ""):
+        super(UniqueNotesAttributeDoFn, self).__init__(config, debug_config, name, namespace)
 
     @staticmethod
-    def name() -> str:
+    def default_name() -> str:
         return "UniqueNotesRatio"
 
     @staticmethod
@@ -282,11 +306,15 @@ class UniqueNotesAttributeDoFn(AttributeDoFn):
 class UniqueBigramsAttributeDoFn(AttributeDoFn):
     """Computes ratio of unique bigrams attribute from NoteSequence objects."""
 
-    def __init__(self, config: Dict[str, Any] = None, debug_config: DoFnDebugConfig = None):
-        super(UniqueBigramsAttributeDoFn, self).__init__(config, debug_config)
+    def __init__(self,
+                 config: Dict[str, Any] = None,
+                 debug_config: DoFnDebugConfig = None,
+                 name: str = "",
+                 namespace: str = ""):
+        super(UniqueBigramsAttributeDoFn, self).__init__(config, debug_config, name, namespace)
 
     @staticmethod
-    def name() -> str:
+    def default_name() -> str:
         return "UniqueBigramsRatio"
 
     @staticmethod
@@ -306,11 +334,15 @@ class UniqueBigramsAttributeDoFn(AttributeDoFn):
 class UniqueTrigramsAttributeDoFn(AttributeDoFn):
     """Computes ratio of unique trigrams attribute from NoteSequence objects."""
 
-    def __init__(self, config: Dict[str, Any] = None, debug_config: DoFnDebugConfig = None):
-        super(UniqueTrigramsAttributeDoFn, self).__init__(config, debug_config)
+    def __init__(self,
+                 config: Dict[str, Any] = None,
+                 debug_config: DoFnDebugConfig = None,
+                 name: str = "",
+                 namespace: str = ""):
+        super(UniqueTrigramsAttributeDoFn, self).__init__(config, debug_config, name, namespace)
 
     @staticmethod
-    def name() -> str:
+    def default_name() -> str:
         return "UniqueTrigramsRatio"
 
     @staticmethod
@@ -330,11 +362,15 @@ class UniqueTrigramsAttributeDoFn(AttributeDoFn):
 class DynamicRangeAttributeDoFn(AttributeDoFn):
     """Computes dynamic range attribute from NoteSequence objects."""
 
-    def __init__(self, config: Dict[str, Any] = None, debug_config: DoFnDebugConfig = None):
-        super(DynamicRangeAttributeDoFn, self).__init__(config, debug_config)
+    def __init__(self,
+                 config: Dict[str, Any] = None,
+                 debug_config: DoFnDebugConfig = None,
+                 name: str = "",
+                 namespace: str = ""):
+        super(DynamicRangeAttributeDoFn, self).__init__(config, debug_config, name, namespace)
 
     @staticmethod
-    def name() -> str:
+    def default_name() -> str:
         return "DynamicRange"
 
     @staticmethod
@@ -352,11 +388,15 @@ class DynamicRangeAttributeDoFn(AttributeDoFn):
 class NoteChangeAttributeDoFn(AttributeDoFn):
     """Computes ratio of note change attribute from NoteSequence objects."""
 
-    def __init__(self, config: Dict[str, Any] = None, debug_config: DoFnDebugConfig = None):
-        super(NoteChangeAttributeDoFn, self).__init__(config, debug_config)
+    def __init__(self,
+                 config: Dict[str, Any] = None,
+                 debug_config: DoFnDebugConfig = None,
+                 name: str = "",
+                 namespace: str = ""):
+        super(NoteChangeAttributeDoFn, self).__init__(config, debug_config, name, namespace)
 
     @staticmethod
-    def name() -> str:
+    def default_name() -> str:
         return "NoteChangeRatio"
 
     @staticmethod
@@ -374,11 +414,15 @@ class NoteChangeAttributeDoFn(AttributeDoFn):
 class RatioNoteOffAttributeDoFn(AttributeDoFn):
     """Computes ratio of note off steps attribute from NoteSequence objects."""
 
-    def __init__(self, config: Dict[str, Any] = None, debug_config: DoFnDebugConfig = None):
-        super(RatioNoteOffAttributeDoFn, self).__init__(config, debug_config)
+    def __init__(self,
+                 config: Dict[str, Any] = None,
+                 debug_config: DoFnDebugConfig = None,
+                 name: str = "",
+                 namespace: str = ""):
+        super(RatioNoteOffAttributeDoFn, self).__init__(config, debug_config, name, namespace)
 
     @staticmethod
-    def name() -> str:
+    def default_name() -> str:
         return "NoteOffStepsRatio"
 
     @staticmethod
@@ -396,11 +440,15 @@ class RatioNoteOffAttributeDoFn(AttributeDoFn):
 class RatioHoldNoteAttributeDoFn(AttributeDoFn):
     """Computes ratio of hold note steps attribute from NoteSequence objects."""
 
-    def __init__(self, config: Dict[str, Any] = None, debug_config: DoFnDebugConfig = None):
-        super(RatioHoldNoteAttributeDoFn, self).__init__(config, debug_config)
+    def __init__(self,
+                 config: Dict[str, Any] = None,
+                 debug_config: DoFnDebugConfig = None,
+                 name: str = "",
+                 namespace: str = ""):
+        super(RatioHoldNoteAttributeDoFn, self).__init__(config, debug_config, name, namespace)
 
     @staticmethod
-    def name() -> str:
+    def default_name() -> str:
         return "HoldNoteStepsRatio"
 
     @staticmethod
@@ -418,11 +466,15 @@ class RatioHoldNoteAttributeDoFn(AttributeDoFn):
 class RepetitiveSectionDoFn(AttributeDoFn):
     """Computes ratio of repetitive sections attribute from NoteSequence objects."""
 
-    def __init__(self, config: Dict[str, Any] = None, debug_config: DoFnDebugConfig = None):
-        super(RepetitiveSectionDoFn, self).__init__(config, debug_config)
+    def __init__(self,
+                 config: Dict[str, Any] = None,
+                 debug_config: DoFnDebugConfig = None,
+                 name: str = "",
+                 namespace: str = ""):
+        super(RepetitiveSectionDoFn, self).__init__(config, debug_config, name, namespace)
 
     @staticmethod
-    def name() -> str:
+    def default_name() -> str:
         return "RepetitiveSectionRatio"
 
     @staticmethod
@@ -442,11 +494,15 @@ class RepetitiveSectionDoFn(AttributeDoFn):
 class LongestRepetitiveSectionDoFn(AttributeDoFn):
     """Computes length of longest repetitive section attribute from NoteSequence objects."""
 
-    def __init__(self, config: Dict[str, Any] = None, debug_config: DoFnDebugConfig = None):
-        super(LongestRepetitiveSectionDoFn, self).__init__(config, debug_config)
+    def __init__(self,
+                 config: Dict[str, Any] = None,
+                 debug_config: DoFnDebugConfig = None,
+                 name: str = "",
+                 namespace: str = ""):
+        super(LongestRepetitiveSectionDoFn, self).__init__(config, debug_config, name, namespace)
 
     @staticmethod
-    def name() -> str:
+    def default_name() -> str:
         return "LongestRepetitiveSection"
 
     @staticmethod

@@ -54,8 +54,12 @@ class NoteSequenceDoFn(ConfigurableDoFn, ABC):
         _write_debug: Write debug information about processed NoteSequence objects.
     """
 
-    def __init__(self, config: Dict[str, Any] = None, debug_config: DoFnDebugConfig = None):
-        super(NoteSequenceDoFn, self).__init__(config, debug_config)
+    def __init__(self,
+                 config: Dict[str, Any] = None,
+                 debug_config: DoFnDebugConfig = None,
+                 name: str = "",
+                 namespace: str = ""):
+        super(NoteSequenceDoFn, self).__init__(config, debug_config, name, namespace)
 
     @abstractmethod
     def _process_internal(self, note_sequence: NoteSequence) -> List[NoteSequence]:
@@ -150,15 +154,19 @@ class ExtractMelodyDoFn(NoteSequenceDoFn):
         for a complete description of the configuration parameters and statistics.
     """
 
-    def __init__(self, config: Dict[str, Any] = None, debug_config: DoFnDebugConfig = None):
-        super(ExtractMelodyDoFn, self).__init__(config, debug_config)
+    def __init__(self,
+                 config: Dict[str, Any] = None,
+                 debug_config: DoFnDebugConfig = None,
+                 name: str = "",
+                 namespace: str = ""):
+        super(ExtractMelodyDoFn, self).__init__(config, debug_config, name, namespace)
 
     @staticmethod
-    def name() -> str:
+    def default_name() -> str:
         return "Melody Extractor"
 
     @staticmethod
-    def namespace() -> str:
+    def default_namespace() -> str:
         return "melody_extractor"
 
     @staticmethod
@@ -225,17 +233,21 @@ class QuantizeDoFn(NoteSequenceDoFn):
         Check out 'quantizer' processor module in 'note_sequence' lib for more information.
     """
 
-    def __init__(self, config: Dict[str, Any] = None, debug_config: DoFnDebugConfig = None):
-        super(QuantizeDoFn, self).__init__(config, debug_config)
+    def __init__(self,
+                 config: Dict[str, Any] = None,
+                 debug_config: DoFnDebugConfig = None,
+                 name: str = "",
+                 namespace: str = ""):
+        super(QuantizeDoFn, self).__init__(config, debug_config, name, namespace)
         if (self._config['steps_per_quarter'] is not None) == (self._config['steps_per_second'] is not None):
             raise ValueError('Exactly one of steps_per_quarter or steps_per_second must be set.')
 
     @staticmethod
-    def name() -> str:
+    def default_name() -> str:
         return "Quantizer"
 
     @staticmethod
-    def namespace() -> str:
+    def default_namespace() -> str:
         return "quantizer"
 
     @staticmethod
@@ -285,17 +297,21 @@ class SplitDoFn(NoteSequenceDoFn):
         information.
     """
 
-    def __init__(self, config: Dict[str, Any] = None, debug_config: DoFnDebugConfig = None):
-        super(SplitDoFn, self).__init__(config, debug_config)
+    def __init__(self,
+                 config: Dict[str, Any] = None,
+                 debug_config: DoFnDebugConfig = None,
+                 name: str = "",
+                 namespace: str = ""):
+        super(SplitDoFn, self).__init__(config, debug_config, name, namespace)
         if (self._config['hop_size_seconds'] is not None) == (self._config['hop_size_bars'] is not None):
             raise ValueError('Exactly one of hop_size_seconds or hope_size_bars must be set.')
 
     @staticmethod
-    def name() -> str:
+    def default_name() -> str:
         return "Splitter"
 
     @staticmethod
-    def namespace() -> str:
+    def default_namespace() -> str:
         return "splitter"
 
     @staticmethod
@@ -323,15 +339,19 @@ class TimeChangeSplitDoFn(NoteSequenceDoFn):
         signatures is among the ones specified by the configuration parameter 'keep_time_signatures'.
     """
 
-    def __init__(self, config: Dict[str, Any] = None, debug_config: DoFnDebugConfig = None):
-        super(TimeChangeSplitDoFn, self).__init__(config, debug_config)
+    def __init__(self,
+                 config: Dict[str, Any] = None,
+                 debug_config: DoFnDebugConfig = None,
+                 name: str = "",
+                 namespace: str = ""):
+        super(TimeChangeSplitDoFn, self).__init__(config, debug_config, name, namespace)
 
     @staticmethod
-    def name() -> str:
+    def default_name() -> str:
         return "Time Change Splitter"
 
     @staticmethod
-    def namespace() -> str:
+    def default_namespace() -> str:
         return "time_change_splitter"
 
     @staticmethod
@@ -372,15 +392,19 @@ class SilenceSplitDoFn(NoteSequenceDoFn):
         for more information.
     """
 
-    def __init__(self, config: Dict[str, Any] = None, debug_config: DoFnDebugConfig = None):
-        super(SilenceSplitDoFn, self).__init__(config, debug_config)
+    def __init__(self,
+                 config: Dict[str, Any] = None,
+                 debug_config: DoFnDebugConfig = None,
+                 name: str = "",
+                 namespace: str = ""):
+        super(SilenceSplitDoFn, self).__init__(config, debug_config, name, namespace)
 
     @staticmethod
-    def name() -> str:
+    def default_name() -> str:
         return "Silence Splitter"
 
     @staticmethod
-    def namespace() -> str:
+    def default_namespace() -> str:
         return "silence_splitter"
 
     @staticmethod
@@ -402,15 +426,19 @@ class SliceDoFn(NoteSequenceDoFn):
         for more information.
     """
 
-    def __init__(self, config: Dict[str, Any] = None, debug_config: DoFnDebugConfig = None):
-        super(SliceDoFn, self).__init__(config, debug_config)
+    def __init__(self,
+                 config: Dict[str, Any] = None,
+                 debug_config: DoFnDebugConfig = None,
+                 name: str = "",
+                 namespace: str = ""):
+        super(SliceDoFn, self).__init__(config, debug_config, name, namespace)
 
     @staticmethod
-    def name() -> str:
+    def default_name() -> str:
         return "Slicer"
 
     @staticmethod
-    def namespace() -> str:
+    def default_namespace() -> str:
         return "slicer"
 
     @staticmethod
@@ -449,15 +477,19 @@ class StretchDoFn(NoteSequenceDoFn):
         for more information.
     """
 
-    def __init__(self, config: Dict[str, Any] = None, debug_config: DoFnDebugConfig = None):
-        super(StretchDoFn, self).__init__(config, debug_config)
+    def __init__(self,
+                 config: Dict[str, Any] = None,
+                 debug_config: DoFnDebugConfig = None,
+                 name: str = "",
+                 namespace: str = ""):
+        super(StretchDoFn, self).__init__(config, debug_config, name, namespace)
 
     @staticmethod
-    def name() -> str:
+    def default_name() -> str:
         return "Stretcher"
 
     @staticmethod
-    def namespace() -> str:
+    def default_namespace() -> str:
         return "stretcher"
 
     @staticmethod
@@ -482,15 +514,19 @@ class SustainDoFn(NoteSequenceDoFn):
         for more information.
     """
 
-    def __init__(self, config: Dict[str, Any] = None, debug_config: DoFnDebugConfig = None):
-        super(SustainDoFn, self).__init__(config, debug_config)
+    def __init__(self,
+                 config: Dict[str, Any] = None,
+                 debug_config: DoFnDebugConfig = None,
+                 name: str = "",
+                 namespace: str = ""):
+        super(SustainDoFn, self).__init__(config, debug_config, name, namespace)
 
     @staticmethod
-    def name() -> str:
+    def default_name() -> str:
         return "Sustainer"
 
     @staticmethod
-    def namespace() -> str:
+    def default_namespace() -> str:
         return "sustainer"
 
     @staticmethod
@@ -513,15 +549,19 @@ class TransposeDoFn(NoteSequenceDoFn):
         for more information.
     """
 
-    def __init__(self, config: Dict[str, Any] = None, debug_config: DoFnDebugConfig = None):
-        super(TransposeDoFn, self).__init__(config, debug_config)
+    def __init__(self,
+                 config: Dict[str, Any] = None,
+                 debug_config: DoFnDebugConfig = None,
+                 name: str = "",
+                 namespace: str = ""):
+        super(TransposeDoFn, self).__init__(config, debug_config, name, namespace)
 
     @staticmethod
-    def name() -> str:
+    def default_name() -> str:
         return "Transposer"
 
     @staticmethod
-    def namespace() -> str:
+    def default_namespace() -> str:
         return "transposer"
 
     @staticmethod
@@ -562,15 +602,19 @@ class TransposeDoFn(NoteSequenceDoFn):
 class DebugNoteSequenceDoFn(NoteSequenceDoFn):
     """ A dummy NoteSequenceDoFn useful to debug note sequences in BEAM pipelines"""
 
-    def __init__(self, config: Dict[str, Any] = None, debug_config: DoFnDebugConfig = None):
-        super(DebugNoteSequenceDoFn, self).__init__(config, debug_config)
+    def __init__(self,
+                 config: Dict[str, Any] = None,
+                 debug_config: DoFnDebugConfig = None,
+                 name: str = "",
+                 namespace: str = ""):
+        super(DebugNoteSequenceDoFn, self).__init__(config, debug_config, name, namespace)
 
     @staticmethod
-    def name() -> str:
+    def default_name() -> str:
         return "DebugNoteSequence"
 
     @staticmethod
-    def namespace() -> str:
+    def default_namespace() -> str:
         return "debug_note_sequence"
 
     @staticmethod

@@ -15,8 +15,12 @@ from resolv_pipelines.pipelines.dofn.base import ConfigurableDoFn, DoFnDebugConf
 @beam.typehints.with_output_types(NoteSequence)
 class AugmentNoteSequenceDoFn(ConfigurableDoFn, ABC):
 
-    def __init__(self, config: Dict[str, Any] = None, debug_config: DoFnDebugConfig = None):
-        super(AugmentNoteSequenceDoFn, self).__init__(config, debug_config)
+    def __init__(self,
+                 config: Dict[str, Any] = None,
+                 debug_config: DoFnDebugConfig = None,
+                 name: str = "",
+                 namespace: str = ""):
+        super(AugmentNoteSequenceDoFn, self).__init__(config, debug_config, name, namespace)
 
     @abstractmethod
     def _augment_sequence(self, note_sequence: NoteSequence) -> List[NoteSequence]:
@@ -87,15 +91,19 @@ class TransposeAugmenterDoFn(AugmentNoteSequenceDoFn):
         for more information.
     """
 
-    def __init__(self, config: Dict[str, Any] = None, debug_config: DoFnDebugConfig = None):
-        super(TransposeAugmenterDoFn, self).__init__(config, debug_config)
+    def __init__(self,
+                 config: Dict[str, Any] = None,
+                 debug_config: DoFnDebugConfig = None,
+                 name: str = "",
+                 namespace: str = ""):
+        super(TransposeAugmenterDoFn, self).__init__(config, debug_config, name, namespace)
 
     @staticmethod
-    def name() -> str:
+    def default_name() -> str:
         return "TransposeAugmenter"
 
     @staticmethod
-    def namespace() -> str:
+    def default_namespace() -> str:
         return "transpose_augmenter"
 
     @staticmethod
