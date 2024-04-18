@@ -89,16 +89,16 @@ class TFRecordLoader(DataLoader):
         if self._filter_fn:
             dataset = dataset.filter(self._filter_fn, name='FilterTFRecordDataset')
 
+        if self._cache_dataset:
+            dataset = dataset.cache(filename=self._cache_filename, name='CacheTFRecordDataset')
+
         if self._shuffle:
             dataset = dataset.shuffle(
-                buffer_size=self._shuffle_buffer_size if self._shuffle_buffer_size else 10 * self._batch_size,
+                buffer_size=self._shuffle_buffer_size if self._shuffle_buffer_size else dataset.cardinality(),
                 seed=self._seed,
                 reshuffle_each_iteration=self._shuffle_repeat,
                 name='ShuffleTFRecordDataset'
             )
-
-        if self._cache_dataset:
-            dataset = dataset.cache(filename=self._cache_filename, name='CacheTFRecordDataset')
 
         if self._batch_size:
             dataset = dataset.batch(
