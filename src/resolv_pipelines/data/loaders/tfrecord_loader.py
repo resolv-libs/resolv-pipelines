@@ -16,6 +16,7 @@ class TFRecordLoader(DataLoader):
                  options: tf.data.Options = None,
                  batch_size: int = 64,
                  batch_drop_reminder: bool = False,
+                 repeat_count: int = None,
                  shuffle: bool = None,
                  shuffle_buffer_size: int = None,
                  shuffle_repeat: bool = False,
@@ -35,6 +36,7 @@ class TFRecordLoader(DataLoader):
         self._options = options if options else self.default_options
         self._batch_size = batch_size
         self._batch_drop_reminder = batch_drop_reminder
+        self._repeat_count = repeat_count
         self._shuffle = shuffle
         self._shuffle_buffer_size = shuffle_buffer_size
         self._shuffle_repeat = shuffle_repeat
@@ -99,6 +101,9 @@ class TFRecordLoader(DataLoader):
                 reshuffle_each_iteration=self._shuffle_repeat,
                 name='ShuffleTFRecordDataset'
             )
+
+        if self._repeat_count:
+            dataset = dataset.repeat(self._repeat_count)
 
         if self._batch_size:
             dataset = dataset.batch(
