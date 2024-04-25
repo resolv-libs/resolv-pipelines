@@ -20,7 +20,6 @@ class RepresentationDatasetPipeline(DatasetPipeline):
     def __init__(self,
                  representation: Representation,
                  canonical_format: CanonicalFormat,
-                 augmenters_config: Dict[str, Dict],
                  allowed_augmenters_map: Dict[str, ConfigurableDoFn.__class__],
                  input_path: Union[str, Path],
                  output_path: Union[str, Path],
@@ -31,6 +30,7 @@ class RepresentationDatasetPipeline(DatasetPipeline):
                  input_path_prefix: str = "",
                  output_path_prefix: str = "data",
                  split_config: Dict = None,
+                 augmenters_config: Dict[str, Dict] = None,
                  distinct: bool = False,
                  force_overwrite: bool = False,
                  logging_level: str = 'INFO',
@@ -112,7 +112,7 @@ class RepresentationDatasetPipeline(DatasetPipeline):
 
             # Apply augmenters
             augmented_dataset = dataset
-            if self._split_augmentation[idx]:
+            if self._augmenters_config and self._split_augmentation[idx]:
                 debug_do_fn_config = DoFnDebugConfig(enabled=self._debug,
                                                      output_path=dataset_output_path,
                                                      output_type=self._debug_output_type,
