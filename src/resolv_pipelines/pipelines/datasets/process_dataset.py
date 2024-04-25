@@ -54,6 +54,7 @@ class ProcessDatasetPipeline(DatasetPipeline):
         self._debug = debug
         self._debug_output_type = debug_output_type
         self._debug_file_pattern = debug_file_pattern
+        self._processors_do_fns = []
 
     @property
     def dataset_output_dir_name(self) -> str:
@@ -89,12 +90,10 @@ class ProcessDatasetPipeline(DatasetPipeline):
                                              output_type=self._debug_output_type,
                                              output_file_pattern=self._debug_file_pattern)
         transformed_input = inputs
-        for do_fn, do_fn_config in self.processors_do_fn_map.items():
-            transformed_input = (
-                    transformed_input
-                    | f'{do_fn.__name__}' >> beam.ParDo(do_fn(config=do_fn_config,
-                                                              debug_config=debug_do_fn_config))
-            )
+        for do_fn_class, do_fn_config in self.processors_do_fn_map.items():
+            do_fn = do_fn_class(config=do_fn_config, debug_config=debug_do_fn_config)
+            self._processors_do_fns.append(do_fn)
+            transformed_input = transformed_input | f'{do_fn_class.__name__}' >> beam.ParDo(do_fn)
 
         # Count transformed sequences
         transformed_input = (transformed_input
@@ -122,7 +121,7 @@ class ProcessDatasetPipeline(DatasetPipeline):
                                              dataset_output_path: Path):
         # Log metrics for all processors
         logging.info(f'------------- METRICS for {dataset_output_path} -------------')
-        for do_fn, _ in self.processors_do_fn_map.items():
+        for do_fn in self._processors_do_fns:
             processor_metrics = results.metrics().query(
                 beam_metrics.MetricsFilter().with_namespace(do_fn.namespace())
             )
