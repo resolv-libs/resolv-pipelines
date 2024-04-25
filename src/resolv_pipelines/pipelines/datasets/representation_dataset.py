@@ -6,6 +6,7 @@ from typing import Dict, List, Union, Tuple, Any
 
 import apache_beam as beam
 import apache_beam.metrics as beam_metrics
+import tensorflow as tf
 
 from .base import DatasetPipeline
 from ...canonical import CanonicalFormat
@@ -30,6 +31,7 @@ class RepresentationDatasetPipeline(DatasetPipeline):
                  input_path_prefix: str = "",
                  output_path_prefix: str = "data",
                  split_config: Dict = None,
+                 distinct: bool = False,
                  force_overwrite: bool = False,
                  logging_level: str = 'INFO',
                  debug: bool = False,
@@ -66,6 +68,7 @@ class RepresentationDatasetPipeline(DatasetPipeline):
         self._allowed_augmenters_map = allowed_augmenters_map
         self._augmenters_config = augmenters_config
         self._datasets_augmenters_do_fns = []
+        self._distinct = distinct
         self._debug = debug
         self._debug_output_type = debug_output_type
         self._debug_file_pattern = debug_file_pattern
@@ -128,20 +131,35 @@ class RepresentationDatasetPipeline(DatasetPipeline):
 
             # Apply representation
             output_dataset = (augmented_dataset
-                              | f"{dataset_name_cap}ToExample" >> beam.Map(self._representation.to_example))
+                            | f"{dataset_name_cap}ToExample" >> beam.Map(self._representation.to_example)
+                            | f'Count{dataset_name_cap}Elements' >> beam.ParDo(
+                                CountElementsDoFn(name=f'{dataset_name if self._split_ratios else "total"}_sequences')
+                            )
+            )
+
+            output_dataset = output_dataset if not self._distinct else (
+                    output_dataset
+                    | f'{dataset_name_cap}SerializeToString' >> beam.Map(
+                        lambda example: example.SerializeToString(deterministic=True)
+                    )
+                    | f'{dataset_name_cap}Distinct' >> beam.Distinct()
+                    | f'{dataset_name_cap}CountDistinct' >> beam.ParDo(
+                            CountElementsDoFn(name=f'{dataset_name if self._split_ratios else ""}_distinct_sequences')
+                    )
+                    | f'{dataset_name_cap}ReconvertToExample' >> beam.Map(
+                            lambda example_str:  tf.train.SequenceExample().FromString(example_str)
+                    )
+            )
 
             # Write datasets
             dataset_prefix = f'{dataset_name}_' if self._split_ratios else ""
             output_tfrecord_prefix = str(dataset_output_path / dataset_name /
                                          (dataset_prefix + self._output_path_prefix))
             _ = (output_dataset
-                 | f'Count{dataset_name_cap}Elements' >> beam.ParDo(
-                        CountElementsDoFn(name=f'{dataset_name if self._split_ratios else "total"}_sequences')
-                    )
                  | f'Write{dataset_name_cap}ToTFRecord' >> beam.io.WriteToTFRecord(
                         file_path_prefix=output_tfrecord_prefix,
                         file_name_suffix=".tfrecord",
-                        coder=beam.coders.ProtoCoder(self._canonical_format))
+                        coder=beam.coders.ProtoCoder(tf.train.SequenceExample))
                  )
 
     def _log_source_dataset_pipeline_metrics(self,
@@ -156,6 +174,9 @@ class RepresentationDatasetPipeline(DatasetPipeline):
         logging.info(f'\tTotal sequences: {total_sequences}')
 
         for idx, split_name in enumerate(self._split_names):
+            dataset_name = self._split_names[idx]
+            dataset_total_sequences = total_sequences
+
             if self._split_ratios:
                 logging.info(f'------------- {split_name.upper()} DATASET -------------')
 
@@ -172,13 +193,22 @@ class RepresentationDatasetPipeline(DatasetPipeline):
                                 logging.info(f'\t\t{metric_result.key.metric.name}: {metric_result.result}')
 
             if self._split_ratios:
-                dataset_name = self._split_names[idx]
                 expected_dataset_sequences = int(total_sequences * self._split_ratios[idx])
                 extracted_dataset_sequence = results.metrics().query(
                     beam_metrics.MetricsFilter().with_namespace('stats').with_name(f'{dataset_name}_sequences')
                 )['counters'][0].result
+                dataset_total_sequences = extracted_dataset_sequence
                 logging.info(f'\t{dataset_name.capitalize()} extracted sequences: {extracted_dataset_sequence} '
                              f'(expected {expected_dataset_sequences})')
+
+            if self._distinct:
+                distinct_sequences = results.metrics().query(
+                    beam_metrics.MetricsFilter().with_namespace('stats').with_name(f'{dataset_name}_distinct_sequences')
+                )['counters'][0].result
+                duplicated_sequences = dataset_total_sequences - distinct_sequences
+                logging.info(f'\tDistinct extracted sequences: {distinct_sequences}')
+                logging.info(f'\tNumber of duplicated sequences: {duplicated_sequences}')
+                logging.info(f'\tRatio of duplicated sequences: {duplicated_sequences * 100 / dataset_total_sequences}')
 
     @staticmethod
     def _partition_fn(_, num_partitions, ratios):

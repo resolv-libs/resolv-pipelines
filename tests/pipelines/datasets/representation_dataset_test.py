@@ -43,7 +43,7 @@ class RepresentationDatasetPipelineTest(unittest.TestCase):
             source_dataset_names=["jsb-chorales-v1"],
             source_dataset_modes=["full"],
             source_dataset_file_types=["mxml"],
-            input_path=Path("./output/datasets/generated/4bars_melodies_distinct"),
+            input_path=Path("./output/datasets/generated/4bars_melodies"),
             input_path_prefix="attributes",
             output_path=self.output_dir,
             output_path_prefix="pitchseq",
@@ -60,7 +60,8 @@ class RepresentationDatasetPipelineTest(unittest.TestCase):
                     "ratio": 0.1
                 }
             },
-            output_dataset_name="4bars_melodies_distinct",
+            output_dataset_name="4bars_melodies",
+            distinct=True,
             force_overwrite=True,
             debug=False,
             pipeline_options={
