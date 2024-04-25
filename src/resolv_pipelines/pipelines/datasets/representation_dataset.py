@@ -180,7 +180,7 @@ class RepresentationDatasetPipeline(DatasetPipeline):
             if self._split_ratios:
                 logging.info(f'------------- {split_name.upper()} DATASET -------------')
 
-            if self._split_augmentation[idx]:
+            if self._augmenters_config and self._split_augmentation[idx]:
                 for do_fn in self._datasets_augmenters_do_fns[idx]:
                     augmenter_metrics = results.metrics().query(
                         beam_metrics.MetricsFilter().with_namespace(do_fn.namespace())
