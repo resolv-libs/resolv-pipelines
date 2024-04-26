@@ -142,7 +142,7 @@ class TransposeAugmenterDoFn(AugmentNoteSequenceDoFn):
                 ns_max_pitch = max(note_sequence.notes, key=lambda note: note.pitch).pitch
                 min_transpose = clamp_transpose_amount(min_transpose, ns_min_pitch, ns_max_pitch)
                 max_transpose = clamp_transpose_amount(max_transpose, ns_min_pitch, ns_max_pitch)
-            return np.random.randint(min_transpose, max_transpose)
+            return np.random.randint(min_transpose, max_transpose) if min_transpose != max_transpose else min_transpose
 
         transposed_ns, del_notes = processors.transposer.transpose_note_sequence(
             note_sequence,
