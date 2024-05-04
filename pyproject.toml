@@ -35,7 +35,7 @@ packages = [
 include = ["CHANGELOG.md"]
 
 [tool.poetry.dependencies]
-python = ">=3.9,<3.12"
+python = "^3.9"
 apache-beam = "^2.55.0"
 matplotlib = "^3.8.2"
 resolv-data = {git = "ssh://git@github.com/resolv-libs/resolv-data.git", rev = "main"}
