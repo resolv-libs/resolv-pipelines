@@ -533,5 +533,5 @@ NS_ATTRIBUTE_DO_FN_MAP = {
     'ratio_note_off_steps': RatioNoteOffAttributeDoFn,
     'ratio_hold_note_steps': RatioHoldNoteAttributeDoFn,
     'repetitive_section_ratio': RepetitiveSectionDoFn,
-    'longest_repetitive_section': LongestRepetitiveSectionDoFn
+    'len_longest_rep_section': LongestRepetitiveSectionDoFn
 }
